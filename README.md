@@ -65,5 +65,7 @@ There are some retouched scripts and code from the original [OpenCvSharp](https:
 ## Future
 
 * Currently the only native dependency is Open CV, and we only use MatchTemplate from it, I'm up to change to a .net replacement in the future.
+* Remove NumPy dependency, and internalize required math methods.
+* Revamp the whole array management using ArrayPools and Spans.
 * Better matcher, better parameters sweet spot, and better vocal filtering.
 
