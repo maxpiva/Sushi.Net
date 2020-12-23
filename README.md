@@ -30,11 +30,11 @@ Of course, it can also shift subtitles in the same way original [Sushi](https://
 
 ## Example Usage
 
-Beign english.mkv and japanese.mkv to different releases from the same show/movie.
+Being english.mkv and japanese.mkv to different releases from the same show/movie.
 
 ```sushi.net --type audio --src english.mkv --dst japanese.mkv```
 
-Will match and english audio stream against a japanese one, the result will a new english stream that is shifted/synced for the japanese one.
+Will match and English audio stream against a Japanese one, the result will a new English stream that is shifted/synced for the Japanese one.
 
 ## Requirements
 
