@@ -1,0 +1,134 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="imgproc.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="core.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="core.h">
+      <Filter>Header Files\core</Filter>
+    </ClInclude>
+    <ClInclude Include="core_Algorithm.h">
+      <Filter>Header Files\core</Filter>
+    </ClInclude>
+    <ClInclude Include="core_FileStorage.h">
+      <Filter>Header Files\core</Filter>
+    </ClInclude>
+    <ClInclude Include="core_InputArray.h">
+      <Filter>Header Files\core</Filter>
+    </ClInclude>
+    <ClInclude Include="core_Mat.h">
+      <Filter>Header Files\core</Filter>
+    </ClInclude>
+    <ClInclude Include="core_OutputArray.h">
+      <Filter>Header Files\core</Filter>
+    </ClInclude>
+    <ClInclude Include="core_MatExpr.h">
+      <Filter>Header Files\core</Filter>
+    </ClInclude>
+    <ClInclude Include="core_PCA.h">
+      <Filter>Header Files\core</Filter>
+    </ClInclude>
+    <ClInclude Include="core_SparseMat.h">
+      <Filter>Header Files\core</Filter>
+    </ClInclude>
+    <ClInclude Include="core_SVD.h">
+      <Filter>Header Files\core</Filter>
+    </ClInclude>
+    <ClInclude Include="include_opencv.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="imgproc_Subdiv2D.h">
+      <Filter>Header Files\imgproc</Filter>
+    </ClInclude>
+    <ClInclude Include="imgproc.h">
+      <Filter>Header Files\imgproc</Filter>
+    </ClInclude>
+    <ClInclude Include="imgproc_CLAHE.h">
+      <Filter>Header Files\imgproc</Filter>
+    </ClInclude>
+    <ClInclude Include="imgproc_LineIterator.h">
+      <Filter>Header Files\imgproc</Filter>
+    </ClInclude>
+    <ClInclude Include="imgproc_GeneralizedHough.h">
+      <Filter>Header Files\imgproc</Filter>
+    </ClInclude>
+    <ClInclude Include="core_FileNode.h">
+      <Filter>Header Files\core</Filter>
+    </ClInclude>
+    <ClInclude Include="core_LDA.h">
+      <Filter>Header Files\core</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{b0a234b5-5c12-4b8e-a0e8-0492fd41e722}</UniqueIdentifier>
+      <Extensions>*.cpp;*.c</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{2b66c248-878e-4591-8091-e5c812526273}</UniqueIdentifier>
+      <Extensions>*.h;*.hpp</Extensions>
+    </Filter>
+    <Filter Include="Header Files\core">
+      <UniqueIdentifier>{7d21ebfe-bc23-421e-ad79-f96eaffb3777}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\ml">
+      <UniqueIdentifier>{17c51294-b680-4aa4-a74c-a51a817dd35a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\features2d">
+      <UniqueIdentifier>{d63db3ce-bfb9-4ab8-95c2-22bfe7020148}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\objdetect">
+      <UniqueIdentifier>{cd61c3fc-60ce-4cd6-8d3b-e87d9e0e6ffe}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\imgproc">
+      <UniqueIdentifier>{f8b57698-6e4b-424d-870c-29526931576a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\video">
+      <UniqueIdentifier>{cc445911-b121-4dc0-b44e-fb11ed931e40}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\stitching">
+      <UniqueIdentifier>{d2ac930b-731a-4af9-ad0d-bfe1272b646d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\optflow">
+      <UniqueIdentifier>{620702b8-6e54-451a-a8af-52270265167a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\calib3d">
+      <UniqueIdentifier>{b7573dcb-d145-4466-99d1-64124c7c5211}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\cuda">
+      <UniqueIdentifier>{381d4d4f-0c83-4c35-a777-fb3214db09f9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\shape">
+      <UniqueIdentifier>{eed306c8-8a82-4f4f-b9d5-447f88befafa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\photo">
+      <UniqueIdentifier>{a91945a2-e61d-4a10-82c3-14772eaa2d21}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\face">
+      <UniqueIdentifier>{55d56498-7105-4f1b-a081-518faedcc993}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\aruco">
+      <UniqueIdentifier>{d8e2cd6a-75d9-4cb0-84e0-b9b4b4102e07}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\ximgproc">
+      <UniqueIdentifier>{90a79351-d5d5-4aa3-9ff3-2df1751b11d6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\flann">
+      <UniqueIdentifier>{fe6ddcd7-d2d0-4c73-99f6-d37802a99d2c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\dnn">
+      <UniqueIdentifier>{82bf2b1d-8eae-4871-a816-59451452eeb4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\tracking">
+      <UniqueIdentifier>{b2a89203-38db-4ab1-a520-3252d788596d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\text">
+      <UniqueIdentifier>{94192d8f-b2fa-46be-ba1c-0fcd09bf1393}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

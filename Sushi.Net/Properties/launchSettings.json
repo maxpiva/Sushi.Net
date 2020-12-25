@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Sushi.Net": {
+      "commandName": "Project",
+      "commandLineArgs": "--type audio --src \"d:\\testbed\\GR757DMKY ENG 01.m4a\" --dst \"\\\\maxraid\\Anime\\[OxyMux] World Trigger [BD 1080p][Dual Audio][Multi Subs]\\[OxyMux] World Trigger 01 [BD 1080p][Dual Audio][Multi Subs].mkv\" -o \"d:\\testbed\\Subs\\\""
+    }
+  }
+}
