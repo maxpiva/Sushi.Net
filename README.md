@@ -52,8 +52,6 @@ SCXvid for keyframe creation. [Windows](https://github.com/soyokaze/SCXvid-stand
 
 [NAudio](https://github.com/naudio/NAudio) - It manages all our wave needs.
 
-[NumPyDotNet](https://github.com/Quansight-Labs/numpy.net) - Is in charge of doing the calculations.
-
 [OpenCvSharp](https://github.com/shimat/opencvsharp) - Gives us the avenue to use Open CV.
 
 [OpenCV](https://opencv.org/) - Matches the audio streams.
@@ -69,7 +67,5 @@ There are some retouched scripts and code from the original [OpenCvSharp](https:
 ## Future
 
 * Currently the only native dependency is Open CV, and we only use MatchTemplate from it, I'm up to change to a .net replacement in the future.
-* Remove NumPy dependency, and internalize required math methods.
-* Revamp the whole array management using ArrayPools and Spans.
 * Better matcher, better parameters sweet spot, and better vocal filtering.
 
