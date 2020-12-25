@@ -1,0 +1,52 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net5.0</TargetFramework>
+    <RuntimeIdentifiers>win-x64;win-x86;linux-x64;osx-x64</RuntimeIdentifiers>
+    <AssemblyName>Sushi.Net</AssemblyName>
+    <ApplicationIcon>sushi.ico</ApplicationIcon>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="5.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="5.0.0" />
+    <PackageReference Include="System.CommandLine" Version="2.0.0-beta1.20574.7" />
+    <PackageReference Include="System.CommandLine.Hosting" Version="0.3.0-alpha.20574.7" />
+    <PackageReference Include="System.CommandLine.Rendering" Version="0.3.0-alpha.20574.7" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Sushi.Net.Library\Sushi.Net.Library.csproj" />
+  </ItemGroup>
+  <!---Open CV Compiled only with Core & ImgProc-->
+  <ItemGroup Condition="'$(RuntimeIdentifier)'=='osx-x64' or ('$(Configuration)' == 'Debug' and $([MSBuild]::IsOSPlatform('OSX')))">
+    <NativeLibs Include="..\runtimes\osx-x64\native\libOpenCvSharpExtern.dylib" />
+    <None Include="@(NativeLibs)">
+      <Link>libOpenCvSharpExtern.dylib</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <!--For Other Linux Dist new Open CV Sharp with Core & ImgProc might need to be compiled-->
+  <ItemGroup Condition="'$(RuntimeIdentifier)'=='linux-x64' or ('$(Configuration)' == 'Debug' and $([MSBuild]::IsOSPlatform('Linux')))">
+    <NativeLibs Include="..\runtimes\ubuntu.16.04-x64\native\libOpenCvSharpExtern.so" />
+    <None Include="@(NativeLibs)">
+      <Link>libOpenCvSharpExtern.so</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup Condition="'$(RuntimeIdentifier)'=='win-x64' or ('$(Configuration)' == 'Debug' and $([MSBuild]::IsOSPlatform('Windows')))">
+    <NativeLibs Include="..\runtimes\win-x64\native\OpenCvSharpExtern.dll" />
+    <None Include="@(NativeLibs)">
+      <Link>OpenCvSharpExtern.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup Condition="'$(RuntimeIdentifier)'=='win-x86'">
+    <NativeLibs Include="..\runtimes\win-x86\native\OpenCvSharpExtern.dll" />
+    <None Include="@(NativeLibs)">
+      <Link>OpenCvSharpExtern.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+</Project>

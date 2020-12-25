@@ -1,0 +1,46 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+    <Version>0.9.0</Version>
+    <Authors>Máximo Piva</Authors>
+    <Company />
+    <Product />
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Copyright>Copyright © 2020 Máximo Piva</Copyright>
+    <Description>Sushi.Net Library
+Automatic Subtitle &amp; Audio Shifter
+It can shift subtitles based on two different audio streams using pattern matching.
+Or it can shift in chunks a foreign/original audio stream to match another foreign/original audio stream using the ambience sound pattern matching.</Description>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/maxpiva/Sushi.Net</PackageProjectUrl>
+    <PackageIcon>sushi.png</PackageIcon>
+    <RepositoryUrl>https://github.com/maxpiva/Sushi.Net</RepositoryUrl>
+    <PackageTags>.net sushi subtitle audio shifter</PackageTags>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CliWrap" Version="3.2.4" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="5.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="5.0.0" />
+    <PackageReference Include="NAudio" Version="1.10.0" />
+    <PackageReference Include="OpenCvSharp4" Version="4.5.0.20201013" />
+    <PackageReference Include="Thinktecture.Extensions.Logging.Configuration" Version="2.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\Extras\sushi.png">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+  </ItemGroup>
+
+</Project>
