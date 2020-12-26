@@ -248,7 +248,7 @@ namespace Sushi.Net.Library
 
                         foreach (SubtitleProvider sub_provider in src_subtitles)
                         {
-                            _logger.LogInformation($"Loading Subtile {sub_provider.Path}...");
+                            _logger.LogInformation($"Loading Subtitle {sub_provider.Path}...");
                             IEvents sub = await sub_provider.ObtainAsync().ConfigureAwait(false);
                             List<List<Event>> search_groups = _grouping.PrepareSearchGroups(sub.Events, src_stream.DurationInSeconds, chapter_times, args.MaxTsDuration, args.MaxTsDistance);
                             _logger.LogInformation($"Calculating Subtitle Shifts for {sub_provider.Path}...");

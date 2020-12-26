@@ -151,6 +151,7 @@ namespace Sushi.Net.Library.Events.Subtitles.Aegis
         }
         private (string result, bool drawingmode) ParseTag(string tag, bool drawingmode, float multiplier)
         {
+
             if (tag.StartsWith("fsp"))
                 return ("fsp" + Mul(tag.Substring(3), multiplier), drawingmode);
             if (tag.StartsWith("pbo"))
@@ -239,8 +240,8 @@ namespace Sushi.Net.Library.Events.Subtitles.Aegis
             foreach (string tag in parsed)
             {
                 string r;
-                (r, drawingmode) = ParseTag(tag, drawingmode, multiplier);
-                bld.Append(r);
+                (r, drawingmode) = ParseTag(tag.Substring(1), drawingmode, multiplier);
+                bld.Append("\\"+r);
             }
             return (bld.ToString(), drawingmode);
         }
