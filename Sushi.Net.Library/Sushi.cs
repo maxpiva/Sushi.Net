@@ -142,8 +142,18 @@ namespace Sushi.Net.Library
                     using (AudioStream src_stream = await src_audio.ObtainWithoutProcess().ConfigureAwait(false))
                     {
                         _manipulation.ExpandBorders(events.Events, src_stream, .1F, args.SilenceThreshold);
-                        foreach (Event ev in events.Events)
-                            _logger.LogInformation($"Chunk (start: {(ev.Start + ev.Shift).FormatTime()}, end: {(ev.End + ev.Shift).FormatTime()}, shifts : {-ev.Shift}, diff: {Math.Abs(ev.Diff)}");
+                        for(int x=0;x<events.Events.Count;x++)
+                        {
+                            Event ev = events.Events[x];
+                            string orig = $"Chunk ({ev.ShiftedStart.FormatTime()}=>{ev.ShiftedEnd.FormatTime()} to {ev.Start.FormatTime()}=>{ev.End.FormatTime()}), shift : {-ev.Shift,15: 0.0000000000;-0.0000000000}, diff: {Math.Abs(ev.Diff),15: 0.0000000000;-0.0000000000}";
+                            if (x > 0)
+                            {
+                                Event prev = events.Events.Take(x).FirstOrDefault(a => a.ShiftedEnd > ev.ShiftedStart);
+                                if (prev!=null)
+                                    orig+=$" [Warn: Section of this block already used at {ev.ShiftedStart.FormatTime()}=>{prev.ShiftedEnd.FormatTime()}]";
+                            }
+                            _logger.LogInformation(orig);
+                        }
                         List<Split> splits = _manipulation.CreateSplits(events.Events, dst_stream.DurationInSeconds);
                         if (!args.DryRun)
                         {

@@ -98,7 +98,7 @@ namespace Sushi.Net.Library.Events
                     end_diff *= diff;
                     start_diff *= diff;
                     states[x].ExpandEnd = states[x].Event.End + (float)end_diff;
-                    states[x].ExpandStart = states[x].ExpandStart - (float)start_diff;
+                    states[x+1].ExpandStart = states[x+1].Event.Start - (float)start_diff;
                 }
             }
 

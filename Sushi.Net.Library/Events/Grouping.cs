@@ -390,8 +390,8 @@ namespace Sushi.Net.Library.Events
         public float AverageShifts<T>(List<T> events) where T : Event
         {
             List<T> nevents = events.Where(a => !a.Linked).ToList();
-            if (nevents.Count == 0)
-                return events.FirstOrDefault()?.Diff ?? 0f;
+            if (nevents.Count <2)
+                return events.FirstOrDefault()?.Shift ?? 0f;
             float[] shifts = nevents.Select(a => a.Shift).ToArray();
             float[] weights = nevents.Select(a => 1 - a.Diff).ToArray();
             double average = shifts.Average(weights);
@@ -429,7 +429,7 @@ namespace Sushi.Net.Library.Events
                     float start_shift = g[0].Shift;
                     float end_shift = g[^1].Shift;
                     float avg_shift = AverageShifts(g);
-                    _logger.LogInformation($"Group (start: {g[0].Start.FormatTime()}, end: {g[^1].End.FormatTime()}, lines: {g.Count}), shifts (start: {start_shift}, end: {end_shift}, average: {avg_shift})");
+                    _logger.LogInformation($"Group ({g[0].Start.FormatTime()}=>{g[^1].End.FormatTime()} to {g[0].ShiftedStart.FormatTime()}=>{g[^1].ShiftedEnd.FormatTime()}, lines: {g.Count,4:D}), shifts (start: {start_shift,15: 0.0000000000;-0.0000000000}, end: {end_shift,15: 0.0000000000;-0.0000000000}, average: {avg_shift,15: 0.0000000000;-0.0000000000})");
                 }
 
                 return groups;
