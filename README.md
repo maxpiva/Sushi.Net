@@ -12,7 +12,7 @@ I heavy recommend following the original Sushi [Wiki](https://github.com/tp7/Sus
 
 ## Downloads
 
-Windows x86, x64, Ubuntu x64 & OSX x64 binaries can be downloaded from (releases)[https://github.com/maxpiva/Sushi.Net/releases].
+Windows x86, x64, Ubuntu x64 & OSX x64 binaries can be downloaded from [releases](https://github.com/maxpiva/Sushi.Net/releases).
 
 ## Build & Third Party Usage
 
