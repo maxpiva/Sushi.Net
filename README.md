@@ -39,7 +39,7 @@ Will match and English audio stream against a Japanese one, the result will a ne
 
 Being english_tv.mkv and english_dvd.mkv diffrent releases from the same show/movie.
 
-```sushi.net --type audio --src english_tv.mkvv --dst english_dvd.mkv```
+```sushi.net --type audio --src english_tv.mkv --dst english_dvd.mkv```
 
 Will match and English audio tv stream against a dvd one, the result will a new English TV stream that is shifted/synced for the DVD one.
 
@@ -75,4 +75,17 @@ There are some retouched scripts and code from the original [OpenCvSharp](https:
 
 * Currently the only native dependency is Open CV, and we only use MatchTemplate from it, I'm up to change to a .net replacement in the future.
 * Better matcher, better parameters sweet spot, and better vocal filtering.
+
+## History
+
+**v0.9.2**
+* Fixed audio best match bug.
+* Added the possibility of selecting the matching algorithm from the command line.
+* Obliterated more Bugs.
+
+**v0.9.1**
+* Squash Bugs.
+
+**v0.9.0**
+* First Version
 
