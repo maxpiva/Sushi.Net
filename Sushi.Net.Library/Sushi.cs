@@ -65,6 +65,7 @@ namespace Sushi.Net.Library
                     args.MaxWindow = args.Window;
                 if (args.MaxWindow == args.Window)
                     args.MaxWindow++;
+                args.Mode ??= args.Type?.ToLowerInvariant() == "audio" ? Mode.CCoeffNormed : Mode.SqDiffNormed;
                 args.Output = args.Output.Strip();
                 args.Src.CheckFileExists("Source");
                 args.Dst.CheckFileExists("Destination");
@@ -134,8 +135,8 @@ namespace Sushi.Net.Library
                     {
                         events = new AudioEvents(silences, dst_stream.DurationInSeconds);
                         List<List<Event>> search_groups = _grouping.PrepareSearchGroups(events.Events, src_stream.DurationInSeconds, new List<float>(), args.MaxTsDuration, args.MaxTsDistance);
-                        _logger.LogInformation($"Calculating Audio Shifts for {src_audio.Path}...");
-                        await _shifter.CalculateShiftsAsync(dst_stream, src_stream, search_groups, args.Window, args.MaxWindow, 1, args.AudioAllowedDifference).ConfigureAwait(false);
+                        _logger.LogInformation($"Calculating Audio Shifts [with {args.Mode.Value.ToString()}] for {src_audio.Path}...");
+                        await _shifter.CalculateShiftsAsync(dst_stream, src_stream, search_groups, args.Window, args.MaxWindow, 1, args.AudioAllowedDifference, args.Mode.Value).ConfigureAwait(false);
                     }
 
                     _logger.LogInformation($"Reloading Source Audio {src_audio.Path}...");
@@ -261,8 +262,8 @@ namespace Sushi.Net.Library
                             _logger.LogInformation($"Loading Subtitle {sub_provider.Path}...");
                             IEvents sub = await sub_provider.ObtainAsync().ConfigureAwait(false);
                             List<List<Event>> search_groups = _grouping.PrepareSearchGroups(sub.Events, src_stream.DurationInSeconds, chapter_times, args.MaxTsDuration, args.MaxTsDistance);
-                            _logger.LogInformation($"Calculating Subtitle Shifts for {sub_provider.Path}...");
-                            await _shifter.CalculateShiftsAsync(src_stream, dst_stream, search_groups, args.Window, args.MaxWindow, !args.NoGrouping ? args.RewindThresh : 0, args.AllowedDifference).ConfigureAwait(false);
+                            _logger.LogInformation($"Calculating Subtitle Shifts [with {args.Mode.Value.ToString()}] for {sub_provider.Path}...");
+                            await _shifter.CalculateShiftsAsync(src_stream, dst_stream, search_groups, args.Window, args.MaxWindow, !args.NoGrouping ? args.RewindThresh : 0, args.AllowedDifference, args.Mode.Value).ConfigureAwait(false);
                             List<Event> events = sub.Events;
                             List<List<Event>> groups = _grouping.GroupWithChapters(events, chapter_times, ignore_chapters, !args.NoGrouping, args.SmoothRadius, args.AllowedDifference, args.MaxGroupStd);
                             if (args.SrcKeyframes != null || args.MakeSrcKeyframes)

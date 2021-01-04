@@ -62,6 +62,8 @@ namespace Sushi.Net.Library.Audio
             int value = (int)((SampleRate * timestamp) + Padding);
             if (value > Data.Size)
                 value = (int)Data.Size;
+            if (value < 0)
+                value = 0;
             return value;
         }
 
@@ -80,7 +82,7 @@ namespace Sushi.Net.Library.Audio
 
 
 
-        public (float difference, float time) FindSubStream(SubStream pattern, float window_center, float window_size, bool type=false)
+        public (float difference, float time) FindSubStream(SubStream pattern, float window_center, float window_size, Mode mode=Mode.SqDiffNormed)
         {
             float padleft = -PaddingInSeconds;
             float padright = DurationInSeconds+ PaddingInSeconds;
@@ -100,7 +102,7 @@ namespace Sushi.Net.Library.Audio
             }
             else
             {
-                (position, difference) = window.MatchTemplate(Mat, pattern.Matrix, type);
+                (position, difference) = window.MatchTemplate(Mat, pattern.Matrix, mode);
                 cached_finds.Add(key,(position, difference));
             }
             return (difference, start_time + (position / (float)SampleRate));

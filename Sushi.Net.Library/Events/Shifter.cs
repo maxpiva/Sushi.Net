@@ -67,11 +67,11 @@ namespace Sushi.Net.Library.Events
         }
 
 
-        private (bool terminate, float new_time, float diff) Find(State group_state, SubStream pattern, AudioStream dest, float original_time, float offset, float window, float sample_rate, float allowed_error, bool is_audio)
+        private (bool terminate, float new_time, float diff) Find(State group_state, SubStream pattern, AudioStream dest, float original_time, float offset, float window, float sample_rate, float allowed_error, Mode mode)
         {
 
-            (float diff, float new_time) = dest.FindSubStream(pattern, original_time + offset, window,!is_audio);
-            (bool terminate, float k_new_time, float k_diff) = PromN(new_time, diff, 2, 2, pattern, dest, original_time, offset, window, sample_rate, allowed_error,!is_audio);
+            (float diff, float new_time) = dest.FindSubStream(pattern, original_time + offset, window,mode);
+            (bool terminate, float k_new_time, float k_diff) = PromN(new_time, diff, 2, 2, pattern, dest, original_time, offset, window, sample_rate, allowed_error,mode);
 //            if (!terminate)
 //                (terminate, k_new_time, k_diff) = PromN(new_time, diff, 2, 2, pattern, dest, original_time, offset, window, sample_rate, allowed_error, is_audio);
             LogUncommitted(group_state, k_diff, offset);
@@ -91,7 +91,7 @@ namespace Sushi.Net.Library.Events
                 Diff=diff;
             }
         }
-        private (bool terminate, float new_time, float diff) PromN(float new_time, float diff, int cnt, int match_cnt, SubStream pattern, AudioStream dest, float original_time, float offset, float window, float sample_rate, float allowed_error, bool type=false)
+        private (bool terminate, float new_time, float diff) PromN(float new_time, float diff, int cnt, int match_cnt, SubStream pattern, AudioStream dest, float original_time, float offset, float window, float sample_rate, float allowed_error, Mode mode=Mode.SqDiffNormed)
         {
             List<Prom> values = new List<Prom>();
             values.Add(new Prom(new_time,diff));
@@ -99,7 +99,7 @@ namespace Sushi.Net.Library.Events
             float reloc = 0;
             foreach(SubStream s in subs)
             {
-                (float d, float t) = dest.FindSubStream(s, original_time + offset+reloc, window, type);
+                (float d, float t) = dest.FindSubStream(s, original_time + offset+reloc, window, mode);
                 values.Add(new Prom(t-reloc,d));
                 reloc += s.Size / sample_rate;
             }
@@ -122,7 +122,7 @@ namespace Sushi.Net.Library.Events
             return (terminate, pr.Time, pr.Diff);
         }
 
-        public Task CalculateShiftsAsync(AudioStream src_stream, AudioStream dst_stream, List<List<Event>> groups_list, float normal_window, float max_window, float rewind_trash, float allowed_error)
+        public Task CalculateShiftsAsync(AudioStream src_stream, AudioStream dst_stream, List<List<Event>> groups_list, float normal_window, float max_window, float rewind_trash, float allowed_error, Mode mode)
         {
             return Task.Run(() =>
             {
@@ -167,7 +167,7 @@ namespace Sushi.Net.Library.Events
                         }
 
                         if (small_window < window && (original_time + last_committed_shift<=kmax))
-                            (diff, new_time) = dst_stream.FindSubStream(tv_audio, original_time + last_committed_shift, small_window,!is_audio);
+                            (diff, new_time) = dst_stream.FindSubStream(tv_audio, Math.Max(original_time + last_committed_shift,0), small_window, mode);
                         if (new_time != null && (new_time.Value - original_time).AbsDiff(last_committed_shift) <= allowed_error)
                         {
                             // fastest case - small window worked, commit the group immediately
@@ -189,12 +189,12 @@ namespace Sushi.Net.Library.Events
                     bool terminate = false;
                     if (original_time <= kmax)
                     {
-                        (terminate, new_time, diff) = Find(group_state, tv_audio, dst_stream, original_time, last_committed_shift, window, src_stream.SampleRate, allowed_error, is_audio);
+                        (terminate, new_time, diff) = Find(group_state, tv_audio, dst_stream, original_time, last_committed_shift, window, src_stream.SampleRate, allowed_error, mode);
                     }
                     if (!terminate && uncommitted_states.Count > 0 && uncommitted_states[^1].Shift.HasValue && original_time  <= kmax)
                     {
                         float start_offset = uncommitted_states[^1].Shift.Value;
-                        (terminate, new_time, diff) = Find(group_state, tv_audio, dst_stream, original_time, start_offset, window, src_stream.SampleRate, allowed_error, is_audio);
+                        (terminate, new_time, diff) = Find(group_state, tv_audio, dst_stream, original_time, start_offset, window, src_stream.SampleRate, allowed_error, mode);
                     }
 
                     float? shift = null;

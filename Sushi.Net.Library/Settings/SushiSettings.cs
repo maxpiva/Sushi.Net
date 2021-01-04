@@ -10,7 +10,8 @@ namespace Sushi.Net.Library.Settings
     {
         [CommandLine("--type","subtitle", "Type of stream to shift.", "audio, subtitle",false,false,"-t")]
         public string Type { get; set; }
-        
+        [CommandLine("--mode",null, "Match Mode [Defaults, Sub: SqDiffNormed, Audio: CCoeffNormed]", "SqDiffNormed, CCoeffNormed, CCorrNormed, SQDiff, CCoeff, CCorr",false,false,"-m")]
+        public Mode? Mode { get; set; }
         [CommandLine("--window", 10, "Search window size.", "seconds")]
         public int Window { get; set; }
 
