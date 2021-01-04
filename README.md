@@ -1,10 +1,11 @@
-## v0.9 Beta
+## v0.9.2 Beta
 
 This work is based on [Sushi](https://github.com/tp7/Sushi) and the command syntax is pretty similar, the only real difference is that the output parameter is a path, not a subtitle. 
 I heavy recommend following the original Sushi [Wiki](https://github.com/tp7/Sushi/wiki) before using this program.
 
 ## Additionaly Sushi.Net supports:
 
+* Automatic Audio Shifting from from different audio sources with same content.
 * Automatic Audio Shifting from different audio languages.
 * Multiple Subtitles
 * Support Resizing the subtitles (ass,ssa) to the destination video
@@ -35,6 +36,12 @@ Being english.mkv and japanese.mkv to different releases from the same show/movi
 ```sushi.net --type audio --src english.mkv --dst japanese.mkv```
 
 Will match and English audio stream against a Japanese one, the result will a new English stream that is shifted/synced for the Japanese one.
+
+Being english_tv.mkv and english_dvd.mkv diffrent releases from the same show/movie.
+
+```sushi.net --type audio --src english_tv.mkvv --dst english_dvd.mkv```
+
+Will match and English audio tv stream against a dvd one, the result will a new English TV stream that is shifted/synced for the DVD one.
 
 ## Requirements
 
