@@ -67,13 +67,13 @@ SCXvid for keyframe creation. [Windows](https://github.com/soyokaze/SCXvid-stand
 
 ## Notice
 
-We used a custom build native version of OpenCV-OpenCVSharp, removing all the parts we don't use (Open CV compiled only with core and imgproc modules), reducing the executable in near 80 Mbytes. 
+I used a custom build native version of OpenCV-OpenCVSharp, removing all the parts we don't use (Open CV compiled only with core and imgproc modules), reducing the executable in near 80 Mbytes. 
 
 There are some retouched scripts and code from the original [OpenCvSharp](https://github.com/shimat/opencvsharp) distribution in the Extras directories, if you want to create the smaller native library version for other linux distributions or maybe the new M1 Macs. Just make sure, you make a pull request ;)
 
 ## Future
 
-* Currently the only native dependency is Open CV, and we only use MatchTemplate from it, I'm up to change to a .net replacement in the future.
+* Currently the only native dependency is Open CV, and only uses MatchTemplate from it, I'm up to change to a .net replacement in the future.
 * Current matcher is pretty accurate for the use case, when the sources have good quality. When the quality degrades, is not that good. So i want to explore some ideas, and see how it goes, like applying FFT to the sources, and audio clipping on the middle ranges, fingerprint analysis, and possible other matchers.
 * Better parameters sweet spot, and better vocal filtering.
 
