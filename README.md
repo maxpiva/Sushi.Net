@@ -77,6 +77,10 @@ There are some retouched scripts and code from the original [OpenCvSharp](https:
 * Current matcher is pretty accurate for the use case, when the sources have good quality. When the quality degrades, is not that good. So i want to explore some ideas, and see how it goes, like applying FFT to the sources, and audio clipping on the middle ranges, fingerprint analysis, and possible other matchers.
 * Better parameters sweet spot, and better vocal filtering.
 
+## TV Sources Tidbits
+
+* If your source is tv based, some tv channels heavily chops endings, beginnings, credits, scene changes, and scenes with silence, so they can put more advertising per show, they can chop up to 1-3 minutes, for an hour show. Because of that, it's recommended you mute the advertising (not removing in it), and increase the window so matching can be better.
+
 ## History
 
 **v0.9.2**
