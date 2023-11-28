@@ -45,11 +45,14 @@ It will match an English audio TV stream against a DVD one, and the result will 
 
 ## Scripting [NEW for v1.0]
 
-By default, sushi will **shift** the audio. But an action **-a** or **-action** new command line exist
+By default, sushi will **shift** the audio and or subtitles. But an action **-a** or **-action** new command line exist
 * shift [Shift Audio]
 * export [Save the Shift movements, into a script file that can be edited in plain text, command usage inside the script file.]
 * script [Execute the script, instead analyze the sources]
-  
+
+The script file created shows the inserts and the cuts required to convert the source file into the destination file.
+This is useful when you have a bunch of files, where the cuts are the same, or to fine-tune a conversion.
+
 
 ## Requirements
 
