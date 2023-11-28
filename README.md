@@ -56,7 +56,7 @@ This is useful when you have a bunch of files, where the cuts/inserts are the sa
 
 ## Requirements
 
-[FFMpeg](http://www.ffmpeg.org/download.html) For Audio Extraction & Manipulation.
+[FFMpeg](http://www.ffmpeg.org/download.html) & FFProbe For Information, Audio Extraction & Manipulation.
 
 ## Optional Requirements
 
