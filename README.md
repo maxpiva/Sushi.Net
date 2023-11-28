@@ -1,4 +1,4 @@
-## v0.9.2 Beta
+## v1.0.0 Still Beta :O
 
 This work is based on [Sushi](https://github.com/tp7/Sushi) and the command syntax is pretty similar, the only real difference is that the output parameter is a path, not a subtitle. 
 I heavy recommend following the original Sushi [Wiki](https://github.com/tp7/Sushi/wiki) before using this program.
@@ -13,13 +13,13 @@ I heavy recommend following the original Sushi [Wiki](https://github.com/tp7/Sus
 
 ## Downloads
 
-Windows x86, x64, Ubuntu x64 & OSX x64 binaries can be downloaded from [releases](https://github.com/maxpiva/Sushi.Net/releases).
+Windows x64, Ubuntu x64 & OSX x64 binaries can be downloaded from [releases](https://github.com/maxpiva/Sushi.Net/releases).
 
 ## Build & Third Party Usage
 
-**Sushi.Net** uses .NET 5 and is a wrapper around **Sushi.Net.Library**.
+**Sushi.Net** uses .NET 8 and is a wrapper around **Sushi.Net.Library**.
 
-Binaries builds are published with .NET 5 self-contained and trimmed, any native libraries (Open CV) are included in the build.
+Binaries builds are published with .NET 8 self-contained and trimmed, any native libraries (Open CV) are included in the build.
 
 **Sushi.Net.Library** can be used in other programs, and it will be uploaded in nuget.org when **Sushi.Net** becomes final.
 
@@ -82,6 +82,9 @@ There are some retouched scripts and code from the original [OpenCvSharp](https:
 * If your source is tv based, some tv channels heavily chops endings, beginnings, credits, scene changes, and scenes with silence, so they can put more advertising per show, they can chop up to 1-3 minutes, for an hour show. Because of that, it's recommended you mute the advertising (not removing in it), and increase the window so matching can be better.
 
 ## History
+
+**v1.0.0.**
+* Too many changes to keep track of them :O
 
 **v0.9.2**
 * Fixed audio best match bug.
