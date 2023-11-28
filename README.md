@@ -51,7 +51,7 @@ By default, sushi will **shift** the audio and or subtitles. But an action **-a*
 * script [Execute the script, instead analyze the sources]
 
 The script file created shows the inserts and the cuts required to convert the source file into the destination file.
-This is useful when you have a bunch of files, where the cuts are the same, or to fine-tune a conversion.
+This is useful when you have a bunch of files, where the cuts/inserts are the same, or to fine-tune a conversion.
 
 
 ## Requirements
@@ -90,7 +90,7 @@ There are some retouched scripts and code from the original [OpenCvSharp](https:
 
 ## TV Sources Tidbits
 
-* If your source is tv based, some tv channels heavily chops endings, beginnings, credits, scene changes, and scenes with silence, so they can put more advertising per show, they can chop up to 1-3 minutes, for an hour show. Because of that, it's recommended you mute the advertising (not removing in it), and increase the window so matching can be better.
+* If your source is TV-based, some TV channels heavily chop endings, beginnings, credits, scene changes, and scenes with silence, so they can put more advertising per show, they can chop up to 1-3 minutes, for an hour show. Because of that, it's recommended you mute the advertising (not removing it), and increase the window so matching can be better.
 
 ## History
 
