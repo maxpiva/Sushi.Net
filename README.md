@@ -1,11 +1,11 @@
 ## v1.0.0 Still Beta :O
 
 This work is based on [Sushi](https://github.com/tp7/Sushi) and the command syntax is pretty similar, the only real difference is that the output parameter is a path, not a subtitle. 
-I heavy recommend following the original Sushi [Wiki](https://github.com/tp7/Sushi/wiki) before using this program.
+I highly recommend following the original Sushi [Wiki](https://github.com/tp7/Sushi/wiki) before using this program.
 
-## Additionaly Sushi.Net supports:
+## Additionally Sushi.Net supports:
 
-* Automatic Audio Shifting from from different audio sources with same content.
+* Automatic Audio Shifting from different audio sources with the same content.
 * Automatic Audio Shifting from different audio languages.
 * Multiple Subtitles
 * Support Resizing the subtitles (ass,ssa) to the destination video
@@ -21,7 +21,7 @@ Windows x64, Ubuntu x64 & OSX x64 binaries can be downloaded from [releases](htt
 
 Binaries builds are published with .NET 8 self-contained and trimmed, any native libraries (Open CV) are included in the build.
 
-**Sushi.Net.Library** can be used in other programs, and it will be uploaded in nuget.org when **Sushi.Net** becomes final.
+**Sushi.Net.Library** can be used in other programs, and it will be uploaded to nuget.org when **Sushi.Net** becomes final.
 
 ## How Audio Shifting Works.
 
@@ -35,13 +35,21 @@ Being english.mkv and japanese.mkv to different releases from the same show/movi
 
 ```sushi.net --type audio --src english.mkv --dst japanese.mkv```
 
-Will match and English audio stream against a Japanese one, the result will a new English stream that is shifted/synced for the Japanese one.
+It will match an English audio stream against a Japanese one, and the result will be a new English stream that is shifted/synced for the Japanese one.
 
-Being english_tv.mkv and english_dvd.mkv diffrent releases from the same show/movie.
+english_tv.mkv and english_dvd.mkv different releases from the same show/movie.
 
 ```sushi.net --type audio --src english_tv.mkv --dst english_dvd.mkv```
 
-Will match and English audio tv stream against a dvd one, the result will a new English TV stream that is shifted/synced for the DVD one.
+It will match an English audio TV stream against a DVD one, and the result will be a new English TV stream that is shifted/synced for the DVD one.
+
+## Scripting [NEW for v1.0]
+
+By default, sushi will **shift** the audio. But an action **-a** or **-action** new command line exist
+* shift [Shift Audio]
+* export [Save the Shift movements, into a script file that can be edited in plain text, command usage inside the script file.]
+* script [Execute the script, instead analyze the sources]
+  
 
 ## Requirements
 
@@ -53,7 +61,7 @@ Will match and English audio tv stream against a dvd one, the result will a new 
 
 SCXvid for keyframe creation. [Windows](https://github.com/soyokaze/SCXvid-standalone/releases) Version. [Linux](https://eyalmazuz.github.io/Linux_Keyframes/) Version. [Mac](https://eyalmazuz.github.io/Linux_Keyframes/) Version. (Follow the Linux Guide replacing apt with [brew](https://brew.sh/))
 
-## Sushi.Net internally uses the following third party libraries.
+## Sushi.Net internally uses the following third-party libraries.
 
 [CliWrap](https://github.com/Tyrrrz/CliWrap) - Amazing and Simple way to spawn and manage executables.
 
@@ -63,18 +71,18 @@ SCXvid for keyframe creation. [Windows](https://github.com/soyokaze/SCXvid-stand
 
 [OpenCV](https://opencv.org/) - Matches the audio streams.
 
-[Thinktecture.Logging.Configuration](https://github.com/PawelGerr/Thinktecture.Logging.Configuration) - Enables us to change the loglevel on the fly.
+[Thinktecture.Logging.Configuration](https://github.com/PawelGerr/Thinktecture.Logging.Configuration) - This enables us to change the log level on the fly.
 
 ## Notice
 
-I used a custom build native version of OpenCV-OpenCVSharp, removing all the parts we don't use (Open CV compiled only with core and imgproc modules), reducing the executable in near 80 Mbytes. 
+I used a custom build native version of OpenCV-OpenCVSharp, removing all the parts we don't use (Open CV compiled only with core and imgproc modules), reducing the executable in nearly 80 Mbytes. 
 
-There are some retouched scripts and code from the original [OpenCvSharp](https://github.com/shimat/opencvsharp) distribution in the Extras directories, if you want to create the smaller native library version for other linux distributions or maybe the new M1 Macs. Just make sure, you make a pull request ;)
+There are some retouched scripts and code from the original [OpenCvSharp](https://github.com/shimat/opencvsharp) distribution in the Extras directories, if you want to create the smaller native library version for other Linux distributions or maybe the new M1 Macs. Just make sure, you make a pull request ;)
 
 ## Future
 
-* Currently the only native dependency is Open CV, and only uses MatchTemplate from it, I'm up to change to a .net replacement in the future.
-* Current matcher is pretty accurate for the use case, when the sources have good quality. When the quality degrades, is not that good. So i want to explore some ideas, and see how it goes, like applying FFT to the sources, and audio clipping on the middle ranges, fingerprint analysis, and possible other matchers.
+* Currently the only native dependency is Open CV, and only uses MatchTemplate from it, I'm up to change to a .Net replacement in the future.
+* Current matcher is pretty accurate for the use case when the sources have good quality. When the quality degrades, is not that good. So I want to explore some ideas and see how it goes, like applying FFT to the sources, and audio clipping on the middle ranges, fingerprint analysis, and possibly other matchers.
 * Better parameters sweet spot, and better vocal filtering.
 
 ## TV Sources Tidbits
