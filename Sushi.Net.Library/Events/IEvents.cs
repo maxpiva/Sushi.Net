@@ -15,11 +15,11 @@ namespace Sushi.Net.Library.Events
         public void SortByTime() => Events = Events.OrderBy(a => a.Start).ToList();
         Task SaveAsync(string path);
 
-        public static Task<IEvents> CreateFromFileAsync(string file)
+        public static Task<IEvents> CreateFromFileAsync(string file, bool fromContainer)
         {
-            if (System.IO.Path.GetExtension(file).ToLowerInvariant() == "srt")
-                return SubRipSubtitles.CreateFromFile(file);
-            return AegisSubtitles.CreateFromFile(file);
+            if (System.IO.Path.GetExtension(file).ToLowerInvariant() == ".srt")
+                return SubRipSubtitles.CreateFromFile(file, fromContainer);
+            return AegisSubtitles.CreateFromFile(file, fromContainer);
         }
     }
 }

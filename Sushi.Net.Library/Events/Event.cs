@@ -31,6 +31,8 @@ namespace Sushi.Net.Library.Events
 
         public abstract string FormatTime(float seconds);
 
+        public abstract Event Clone();
+
 
         public void ApplyShift()
         {
@@ -38,6 +40,11 @@ namespace Sushi.Net.Library.Events
             End = ShiftedEnd;
         }
 
+        public void ApplyTime(float value)
+        {
+            Start += value;
+            End += value;
+        }
         public void SetShift(float shift, float audio_diff)
         {
             Debug.Assert(!Linked, "Cannot set shift of a linked event");

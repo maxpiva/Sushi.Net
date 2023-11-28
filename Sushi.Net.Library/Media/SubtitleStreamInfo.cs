@@ -28,8 +28,11 @@ namespace Sushi.Net.Library.Media
             Type = maps.ContainsKey(m.Groups[4].Value.ToLowerInvariant()) ? maps[m.Groups[4].Value.ToLowerInvariant()] : m.Groups[4].Value;
             Default = m.Groups[5].Value != "";
             Title = m.Groups[6].Value.Strip();
+            MediaType = MediaStreamType.Subtitle;
         }
         public string Type { get; set; }
+
+        public bool Forced => Info.Contains("(forced)");
 
     }
 }

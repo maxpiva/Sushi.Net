@@ -5,11 +5,15 @@ namespace Sushi.Net.Library.Events.Subtitles.Aegis
 {
     public class FontStyles : List<FontStyle>
     {
+        internal FontStyleParser _fontStyleParser;
+
+        public string V4Version { get; set; }
+
         public override string ToString()
         {
             StringBuilder bld = new();
-            bld.AppendLine("[V4+ Styles]");
-            bld.AppendLine("Format: Name,Fontname,Fontsize,PrimaryColour,SecondaryColour,OutlineColour,BackColour,Bold,Italic,Underline,StrikeOut,ScaleX,ScaleY,Spacing,Angle,BorderStyle,Outline,Shadow,Alignment,MarginL,MarginR,MarginV,Encoding");
+            bld.AppendLine(V4Version);
+            bld.AppendLine(_fontStyleParser.ToString());
             ForEach(a => bld.AppendLine(a.ToString()));
             return bld.ToString();
         }

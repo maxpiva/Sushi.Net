@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
+using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -9,11 +12,12 @@ using CliWrap;
 using CliWrap.EventStream;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using OpenCvSharp.ML;
 using Sushi.Net.Library.Audio;
 using Sushi.Net.Library.Decoding;
 using Sushi.Net.Library.Events;
 using Sushi.Net.Library.Tools;
-
+using UtfUnknown;
 
 namespace Sushi.Net.Library.Common
 {
@@ -23,10 +27,42 @@ namespace Sushi.Net.Library.Common
         {
             return Path.GetExtension(path);
         }
+        private static Dictionary<string, string> maps = new Dictionary<string, string> {
+            {
+                "ssa",
+                ".ass"},
+            {
+                "ass",
+                ".ass"},
+            {
+                "subrip",
+                ".srt"}};
 
-        public static Task<string> ReadAllTextAsync(this string path)
+        public static string ToExtension(this string codec)
         {
-            return File.ReadAllTextAsync(path);
+            codec = codec.ToLowerInvariant();
+            if (maps.ContainsKey(codec))
+                return maps[codec];
+            return "." + codec;
+        }
+
+        public static string ToCodec(this string extension)
+        {
+            extension = extension.ToLowerInvariant();
+            if (maps.ContainsValue(extension))
+            {
+                KeyValuePair<string, string> value = maps.FirstOrDefault(a => a.Value == extension);
+                return value.Key;
+            }
+
+            return extension.Substring(1);
+        }
+        public static async Task<string> ReadAllTextAsync(this string path, bool FromContainer=true)
+        {
+            DetectionResult result = CharsetDetector.DetectFromFile(path); // or pass FileInfo
+            DetectionDetail det=result.Detected;
+            Encoding enc = result?.Detected?.Encoding ?? Encoding.GetEncoding(1252);
+            return await File.ReadAllTextAsync(path, enc).ConfigureAwait(false);
         }
 
         public static string FormatSrtTime(this float seconds)
@@ -40,13 +76,23 @@ namespace Sushi.Net.Library.Common
             long cs = (long) Math.Round(seconds * 100);
             return $"{cs / 360000}:{cs / 6000 % 60:d2}:{cs / 100 % 60:d2}.{cs % 100:d2}";
         }
+        public static string FormatTime2(this float seconds)
+        {
+            long cs = (long) Math.Round(seconds * 1000);
+            return $"{cs / 3600000}:{cs / 60000 % 60:d2}:{cs / 1000 % 60:d2}.{cs % 1000:d3}";
+        }
 
         public static float ParseAssTime(this string str)
         {
             float[] vals = str.Split(":").Select(Convert.ToSingle).ToArray();
             return vals[0] * 3600 + vals[1] * 60 + vals[2];
         }
+        public static float ParseTime(this string str)
+        {
+            float[] vals = str.Split(':','.').Select(Convert.ToSingle).ToArray();
+            return (vals[0] * 3600000 + vals[1] * 60000 + vals[2] * 1000 + vals[3])/1000;
 
+        }
         public static float Clip(this float value, float minimum, float maximum)
         {
             return Math.Max(Math.Min(value, maximum), minimum);
@@ -140,12 +186,37 @@ namespace Sushi.Net.Library.Common
             if (processor!=null)
                 progress?.Report(processor.PercentageFromLine(text));
         }
-        public static async Task<string> WithLogger(this Command cmd, ILogger logger, CancellationToken token, bool useStdError=true, IPercentageProcessor processor=null, IProgress<int> progress=null)
+        public static Encoding GetEncoding(this string filename)
+        {
+            //FROM StackOverflow user: 2Toad
+            //https://stackoverflow.com/a/19283954
+            // Read the BOM
+            var bom = new byte[4];
+            using (var file = new FileStream(filename, FileMode.Open, FileAccess.Read))
+            {
+                file.Read(bom, 0, 4);
+            }
+
+            // Analyze the BOM
+            if (bom[0] == 0x2b && bom[1] == 0x2f && bom[2] == 0x76) return Encoding.UTF7;
+            if (bom[0] == 0xef && bom[1] == 0xbb && bom[2] == 0xbf) return Encoding.UTF8;
+            if (bom[0] == 0xff && bom[1] == 0xfe && bom[2] == 0 && bom[3] == 0) return Encoding.UTF32; //UTF-32LE
+            if (bom[0] == 0xff && bom[1] == 0xfe) return Encoding.Unicode; //UTF-16LE
+            if (bom[0] == 0xfe && bom[1] == 0xff) return Encoding.BigEndianUnicode; //UTF-16BE
+            if (bom[0] == 0 && bom[1] == 0 && bom[2] == 0xfe && bom[3] == 0xff) return new UTF32Encoding(true, true);  //UTF-32BE
+
+            // We actually have no idea what the encoding is if we reach this point, so
+            // you may wish to return null instead of defaulting to ASCII
+            return null;
+        }
+
+        public static async Task<string> WithLogger(this Command cmd, ILogger logger, CancellationToken token, bool useStdError=true, IPercentageProcessor processor=null, IProgress<int> progress=null, Encoding enc=null)
         {
 
             
             StringBuilder bld = new StringBuilder();
-            await foreach (var cmdEvent in cmd.ListenAsync(token))
+            IAsyncEnumerable<CommandEvent> ev = enc == null ? cmd.ListenAsync(token) : cmd.ListenAsync(enc, token);
+            await foreach (var cmdEvent in ev)
             {
                 switch (cmdEvent)
                 {
@@ -200,11 +271,11 @@ namespace Sushi.Net.Library.Common
                 return path.Substring(0, path.Length - 1);
             return path;
         }
-
-        public static void AddSushi<T>(this IServiceCollection service, GlobalCancellation globalCancel) where T : class, IProgressLoggerFactory
+        public static void AddSushi<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] T>(this IServiceCollection service, GlobalCancellation globalCancel) where T : class, IProgressLoggerFactory
         {
             service.AddSingleton<Sushi>();
             service.AddSingleton<FFMpeg>();
+            service.AddSingleton<FFProbe>();
             service.AddSingleton<MkvExtract>();
             service.AddSingleton<Sushi>();
             service.AddSingleton<SCXviD>();
@@ -215,6 +286,7 @@ namespace Sushi.Net.Library.Common
             service.AddSingleton<BlockManipulation>();
             service.AddSingleton<IProgressLoggerFactory, T>();
             service.AddSingleton<IGlobalCancellation>(globalCancel);
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
         }
     }
 }

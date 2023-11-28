@@ -3,8 +3,11 @@ using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.Builder;
 using System.CommandLine.Hosting;
+using System.CommandLine.Invocation;
 using System.CommandLine.Parsing;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -32,6 +35,7 @@ namespace Sushi.Net
         
         private static Task<int> Main(string[] args)
         {
+
             _globalCancellation = new GlobalCancellation();
             _lcfg = new SushiLoggingConfiguration();
             Console.CancelKeyPress += (s, e) =>
@@ -43,7 +47,11 @@ namespace Sushi.Net
                 Environment.Exit(1);
             };
 
-            return BuildCommandLine().UseHost(_ =>
+            return BuildCommandLine().
+                
+                
+                
+                UseHost(_ =>
             {
                 return Host.CreateDefaultBuilder(args).ConfigureAppConfiguration(config =>
                 {
@@ -56,8 +64,9 @@ namespace Sushi.Net
         }
 
 
-        private static Task Process(SushiSettings settings, IHost host)
+        private static Task Process(SushiSettings settings, InvocationContext context)
         {
+            IHost host = context.BindingContext.GetService<IHost>();
             Library.Sushi sushi = host.Services.GetService<Library.Sushi>();
             return sushi?.ValidateAndProcess(settings) ?? Task.FromResult(0);
         }
@@ -68,7 +77,6 @@ namespace Sushi.Net
             RootCommand cmd = n.GetRootCommand(Process);
             return new CommandLineBuilder(cmd);
         }
-
         private static void ConfigureHostBuilder(IHostBuilder hostBuilder)
         {
             hostBuilder

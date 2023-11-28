@@ -9,7 +9,11 @@ namespace Sushi.Net.Library.Events.Subtitles.SubRip
         public static Regex Event_Regex = new Regex(@"(\d+?)\s+?(\d{1,2}:\d{1,2}:\d{1,2},\d+)\s-->\s(\d{1,2}:\d{1,2}:\d{1,2},\d+).(.+?)(?=(?:\d+?\s+?\d{1,2}:\d{1,2}:\d{1,2},\d+\s-->\s\d{1,2}:\d{1,2}:\d{1,2},\d+)|$)", RegexOptions.Compiled | RegexOptions.Singleline);
  
         public override bool IsComment => false;
-            
+
+        private SubRipSubtitle()
+        {
+
+        }
 
         public SubRipSubtitle(string text)
         {
@@ -38,5 +42,16 @@ namespace Sushi.Net.Library.Events.Subtitles.SubRip
         private float ParseTime(string str) => str.Replace(",", ".").ParseAssTime();
 
         public override string FormatTime(float seconds) => seconds.FormatSrtTime();
+        
+        public override Event Clone()
+        {
+            return new SubRipSubtitle()
+            {
+                Text = this.Text,
+                End = this.End,
+                SourceIndex = this.SourceIndex,
+                Start = this.Start
+            };
+        }
     }
 }

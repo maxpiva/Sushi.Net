@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Sushi.Net.Library.Events.Audio
@@ -6,7 +8,12 @@ namespace Sushi.Net.Library.Events.Audio
     public class AudioEvents : IEvents
     {
         public List<Event> Events { get; set; }
-        
+        public List<float> ChapterTimes { get; set; }
+        public AudioEvents(List<Event> events)
+        {
+            Events = events;
+        }
+
         public AudioEvents(List<(float start, float end)> silences, float maxduration)
         {
             float orig = 0;

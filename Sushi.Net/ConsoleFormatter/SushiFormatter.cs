@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using Microsoft.Extensions.Logging;
@@ -8,6 +9,7 @@ using Microsoft.Extensions.Options;
 
 namespace Sushi.Net.ConsoleFormatter
 {
+
     public class SushiFormatter : Microsoft.Extensions.Logging.Console.ConsoleFormatter
     {
         private IDisposable _optionsReloadToken;

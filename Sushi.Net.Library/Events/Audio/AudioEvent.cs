@@ -13,5 +13,21 @@ namespace Sushi.Net.Library.Events.Audio
             End = end;
         }
 
+        private AudioEvent()
+        {
+
+        }
+        public override Event Clone()
+        {
+            return new AudioEvent()
+            {
+                Text = this.Text,
+                End = this.End,
+                SourceIndex = this.SourceIndex,
+                Start = this.Start
+            };
+        }
+
+
     }
 }

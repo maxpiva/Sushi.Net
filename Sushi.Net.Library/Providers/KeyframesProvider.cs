@@ -6,27 +6,28 @@ using Sushi.Net.Library.Decoding;
 
 namespace Sushi.Net.Library.Providers
 {
-    public class KeyframesProvider : Provider<List<long>>
+    public class KeyframesProvider : Provider<List<long>, DummyMedia>
     {
 
         public  KeyframesProvider(Mux original, string path, bool make, string temp_path)
         {
-            if (make && (original==null || !original.HasVideo))
+            Media = new DummyMedia(original);
+            if (make && (original==null || original.Videos.Count==0))
                 throw new SushiException($"Cannot make keyframes from {original?.Path ?? path ?? "'null'"} because it doesn't have any video!");
             if (make)
             {
-                Path = original.Path.FormatFullPath("_sushi_keyframes.txt", temp_path);
-                original.SetKeyframes(Path);
-                RequireDemuxing = true;
+                Media.ProcessPath = original.Path.FormatFullPath("_sushi_keyframes.txt", temp_path);
+                original.SetKeyframes(Media.ProcessPath);
+
             }
             else
-                Path = path;
+                Media.ProcessPath = path;
         }
 
         public override async Task<List<long>> ObtainAsync()
         {
             await CheckExistance().ConfigureAwait(false);
-            string text = await Path.ReadAllTextAsync().ConfigureAwait(false);
+            string text = await Media.ProcessPath.ReadAllTextAsync().ConfigureAwait(false);
             if (text.Contains("# XviD 2pass stat file"))
             {
                 List<long> frames = new List<long>();
@@ -42,7 +43,7 @@ namespace Sushi.Net.Library.Providers
                     frames.Insert(0, 0);
                 return frames;
             }
-            throw new SushiException($"Unsupported keyframes type in file {Path}.");
+            throw new SushiException($"Unsupported keyframes type in file {Media.ProcessPath}.");
         }
     }
 }

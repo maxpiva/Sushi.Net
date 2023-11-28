@@ -10,14 +10,6 @@ using Sushi.Net.Library.Tools;
 
 namespace Sushi.Net.Library.Audio
 {
-
-    public enum AudioPostProcess
-    {
-        SubtitleSearch,
-        AudioSearch,
-        None
-    }
-
     public class AudioReader
     {
 

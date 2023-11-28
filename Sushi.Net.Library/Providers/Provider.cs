@@ -5,27 +5,25 @@ using Sushi.Net.Library.Decoding;
 
 namespace Sushi.Net.Library.Providers
 {
-    public abstract class Provider<T>
+    public abstract class Provider<T,S> where S: Decoding.Media
     {
-        public string Path { get; internal set;}
-        public Mux Mux { get; internal set;}
-        public bool RequireDemuxing { get; internal set;}
-        
+
+        public S Media { get; internal set;}
+
         public abstract Task<T> ObtainAsync();
         
         public async Task CheckExistance()
         {
             await ResolveAsync().ConfigureAwait(false);
-            if (!File.Exists(Path))
-                throw new SushiException($"Unable to find {Path ?? "null"}, aborting...");
+            if (!File.Exists(Media.ProcessPath))
+                throw new SushiException($"Unable to find {Media.ProcessPath ?? "null"}, aborting...");
         }
         public async Task ResolveAsync()
         {
-            if (!RequireDemuxing)
+            if (Media.Mux == null || !Media.ShouldProcess)
                 return;
-            if (Mux != null && !Mux.Processed)
-                await Mux.ProcessAsync().ConfigureAwait(false);
+            if (Media.Mux != null && !Media.Processed)
+                await Media.Mux.ProcessAsync().ConfigureAwait(false);
         }
-
     }
 }

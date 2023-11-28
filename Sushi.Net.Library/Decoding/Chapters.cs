@@ -30,9 +30,9 @@ namespace Sushi.Net.Library.Decoding
         }
 
 
-        public Chapters(IEnumerable<Match> matches)
+        public Chapters(IEnumerable<float> matches)
         {
-            times = matches.Select(a => Convert.ToSingle(a.Groups[1].Value)).ToList();
+            times = matches.ToList();
         }
         private static Chapters CreateFromMatchCollection(MatchCollection m)
         {

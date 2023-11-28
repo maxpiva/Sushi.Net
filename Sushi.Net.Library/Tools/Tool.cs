@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Threading.Tasks;
 using CliWrap;
 using Microsoft.Extensions.Logging;
@@ -30,7 +31,7 @@ namespace Sushi.Net.Library.Tools
 
 
         public bool IsAvailable => _exepath != null;
-        public Command Command => Cli.Wrap(_exepath.Strip());
+        public virtual Command Command => Cli.Wrap(_exepath.Strip());
 
         public Command AddStandardErrorLogging(Command cmd, IPercentageProcessor percentageProcessor = null, IProgress<int> pro = null)
         {
@@ -56,12 +57,12 @@ namespace Sushi.Net.Library.Tools
 
             return null;
         }
-        public async Task<string> ExecuteAsync(Command cmd, bool useStdError=true, IPercentageProcessor percentageProcessor=null)
+        public async Task<string> ExecuteAsync(Command cmd, bool useStdError=true, IPercentageProcessor percentageProcessor=null, Encoding enc=null)
         {
             try
             {
                 IProgress<int> pro = CreateProgress(percentageProcessor);
-                return await cmd.WithLogger(_logger, _cancellation.GetToken(), useStdError,percentageProcessor, pro).ConfigureAwait(false);
+                return await cmd.WithLogger(_logger, _cancellation.GetToken(), useStdError,percentageProcessor, pro, enc).ConfigureAwait(false);
             }
             catch (TaskCanceledException)
             {

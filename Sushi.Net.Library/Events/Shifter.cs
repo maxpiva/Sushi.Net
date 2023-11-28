@@ -126,6 +126,7 @@ namespace Sushi.Net.Library.Events
         {
             return Task.Run(() =>
             {
+
                 float small_window = 1.5f;
                 int idx = 0;
                 List<State> committed_states = new List<State>();
@@ -187,11 +188,11 @@ namespace Sushi.Net.Library.Events
                     }
 
                     bool terminate = false;
-                    if (original_time <= kmax)
+                    if (original_time+last_committed_shift <= kmax)
                     {
                         (terminate, new_time, diff) = Find(group_state, tv_audio, dst_stream, original_time, last_committed_shift, window, src_stream.SampleRate, allowed_error, mode);
                     }
-                    if (!terminate && uncommitted_states.Count > 0 && uncommitted_states[^1].Shift.HasValue && original_time  <= kmax)
+                    if (!terminate && uncommitted_states.Count > 0 && uncommitted_states[^1].Shift.HasValue && original_time+uncommitted_states[^1].Shift.Value  <= kmax)
                     {
                         float start_offset = uncommitted_states[^1].Shift.Value;
                         (terminate, new_time, diff) = Find(group_state, tv_audio, dst_stream, original_time, start_offset, window, src_stream.SampleRate, allowed_error, mode);
@@ -251,7 +252,10 @@ namespace Sushi.Net.Library.Events
                         {
                             Event link_to = group.Where(a=>!a.Linked).Reverse().FirstOrDefault();
                             if (link_to != null)
+                            {
                                 search_group.ForEach(a => a.LinkEvent(link_to));
+                                break;
+                            }
                         }
                     }
                     else

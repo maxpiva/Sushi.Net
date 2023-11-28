@@ -1,7 +1,8 @@
 {
   "profiles": {
     "Sushi.Net": {
-      "commandName": "Project"
+      "commandName": "Project",
+      "commandLineArgs": ""
     }
   }
 }

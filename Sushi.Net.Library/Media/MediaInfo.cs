@@ -5,9 +5,9 @@ namespace Sushi.Net.Library.Media
 {
     public class MediaInfo
     {
-        public List<MediaStreamInfo> Videos { get; set; }
-        public List<MediaStreamInfo> Audios { get; set; }
-        public List<SubtitleStreamInfo> Subtitles { get; set; }
+        public List<VideoMedia> Videos { get; set; }
+        public List<AudioMedia> Audios { get; set; }
+        public List<SubtitleMedia> Subtitles { get; set; }
         public Chapters Chapters { get; set; }
     }
 }

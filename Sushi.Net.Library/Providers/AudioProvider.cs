@@ -9,7 +9,7 @@ using Sushi.Net.Library.Events;
 
 namespace Sushi.Net.Library.Providers
 {
-    public class AudioProvider : Provider<AudioStream>
+    public class AudioProvider : Provider<AudioStream, AudioMedia>
     {
                 
 
@@ -17,68 +17,31 @@ namespace Sushi.Net.Library.Providers
         public SampleType SampleType { get;}
         public int PaddingInSeconds { get;  }
         private readonly AudioReader _reader;
-        public string OutputPath { get; private set; }
 
         public override async Task<AudioStream> ObtainAsync()
         {
             await CheckExistance().ConfigureAwait(false);
-            return await _reader.LoadAsync(Path, SampleRate,  Mux.AudioProcess, SampleType,PaddingInSeconds).ConfigureAwait(false);
+            return await _reader.LoadAsync(Media.ProcessPath, SampleRate, Media.AudioProcess, SampleType,PaddingInSeconds).ConfigureAwait(false);
         }
 
         public async Task<AudioStream> ObtainWithoutProcess()
         {
             await CheckExistance().ConfigureAwait(false);
-            return await _reader.LoadAsync(Path, SampleRate, AudioPostProcess.None, SampleType,PaddingInSeconds).ConfigureAwait(false);
+            return await _reader.LoadAsync(Media.ProcessPath, SampleRate, AudioPostProcess.None, SampleType,PaddingInSeconds).ConfigureAwait(false);
 
         }
-        private void SetOuputPath(string path, string outputPath)
+
+        public AudioProvider(AudioReader reader, AudioMedia original, int sample_rate, SampleType type, int padding, bool normalize, bool voiceRemoval , bool downmix, AudioPostProcess process, string temp_path = null, string outputPath = null)
         {
-            if (outputPath != null)
-            {
-                if (Directory.Exists(outputPath))
-                    OutputPath = path.FormatFullPath("_sushi.flac", outputPath);
-                else
-                    OutputPath = outputPath;
-            }
-        }
-        public AudioProvider(AudioReader reader, Mux original, int? index, int sample_rate, SampleType type, int padding, AudioPostProcess process, string temp_path=null,string outputPath=null)
-        {
-            Mux = original;
-            _reader=reader;
+            Media = original;
+            _reader = reader;
             SampleRate = sample_rate;
             PaddingInSeconds = padding;
-            SampleType=type;
-            if (original.IsWav)
-            {
-                Path = original.Path;
-                SetOuputPath(Path, outputPath);
-            }
-            else
-            {
-                if (index.HasValue && !original.MediaInfo.Audios.Any(a => a.Id == index.Value))
-                {
-                    if (index.Value == 0 && original.MediaInfo.Audios.Count == 1)
-                        index = original.MediaInfo.Audios.First().Id;
-                    else
-                        throw new SushiException($"Invalid audio index {index.Value}.");
-                }
-                Path= original.Path.FormatFullPath("_sushi.wav", temp_path);
-                original.SetAudio(index,Path,sample_rate, process);
-                RequireDemuxing=true;
-                SetOuputPath(original.Path, outputPath);
-
-
-            }
-
+            SampleType = type;
+            Media.SetAudioProcessing(sample_rate, normalize, process,voiceRemoval, downmix);
+            Media.ShouldProcess = true;
         }
 
-        public Task ShiftAudioAsync(List<Split> splits)
-        {
-            return Mux.ShiftAudioAsync(OutputPath, splits);
-
-
-        }
-        
     }
     
 }

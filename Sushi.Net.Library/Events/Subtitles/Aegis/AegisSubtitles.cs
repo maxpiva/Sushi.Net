@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -16,12 +17,13 @@ namespace Sushi.Net.Library.Events.Subtitles.Aegis
         {
         }
 
-
         public ScriptInfoList ScriptInfo { get; } = new();
         public FontStyles Styles { get; } = new();
         public SortedDictionary<string, List<string>> Other { get; } = new();
         public List<Event> Events { get; set; } = new();
 
+
+        internal AegisSubtitleParser _subsParser;
 
         public Task SaveAsync(string path)
         {
@@ -40,7 +42,7 @@ namespace Sushi.Net.Library.Events.Subtitles.Aegis
             {
                 List<AegisSubtitle> events = Events.OrderBy(a => a.Start).Cast<AegisSubtitle>().ToList();
                 bld.AppendLine("[Events]");
-                bld.AppendLine("Format: Layer,Start,End,Style,Name,MarginL,MarginR,MarginV,Effect,Text");
+                bld.AppendLine(_subsParser.ToString());
                 events.ForEach(a => bld.AppendLine(a.ToString()));
             }
 
@@ -64,18 +66,25 @@ namespace Sushi.Net.Library.Events.Subtitles.Aegis
             ass.ScriptInfo.Add(line);
         }
 
+
         private static void ParseStyleLine(AegisSubtitles ass, string line)
         {
             if (line.StartsWith("Format:"))
+            {
+                ass.Styles._fontStyleParser = new FontStyleParser(line);
                 return;
-            ass.Styles.Add(new FontStyle(line));
+            }
+            ass.Styles.Add(ass.Styles._fontStyleParser.CreateFontStyle(line));
         }
-
+            
         private static void ParseEventLine(AegisSubtitles ass, string line)
         {
             if (line.StartsWith("Format:"))
+            {
+                ass._subsParser = new AegisSubtitleParser(line);
                 return;
-            ass.Events.Add(new AegisSubtitle(line, ass.Events.Count + 1));
+            }
+            ass.Events.Add(ass._subsParser.CreateSubtitle(line, ass.Events.Count + 1));
         }
 
         private static Action<AegisSubtitles, string> CreateGenericParse(AegisSubtitles ass, string line)
@@ -86,9 +95,9 @@ namespace Sushi.Net.Library.Events.Subtitles.Aegis
             return (rass, rline) => { rass.Other[line].Add(rline); };
         }
 
-        public static async Task<IEvents> CreateFromFile(string path)
+        public static async Task<IEvents> CreateFromFile(string path, bool fromContainer)
         {
-            string text = await path.ReadAllTextAsync().ConfigureAwait(false);
+            string text = await path.ReadAllTextAsync(fromContainer).ConfigureAwait(false);
             Action<AegisSubtitles, string> func = null;
             AegisSubtitles ass = new AegisSubtitles();
             int cnt = 0;
@@ -101,8 +110,11 @@ namespace Sushi.Net.Library.Events.Subtitles.Aegis
                 string low = line.ToLowerInvariant();
                 if (low == "[script info]")
                     func = ParseScriptInfoLine;
-                else if (low == "[v4+ styles]")
+                else if (low == "[v4+ styles]" || low == "[v4 styles]")
+                {
+                    ass.Styles.V4Version = low;
                     func = ParseStyleLine;
+                }
                 else if (low == "[events]")
                     func = ParseEventLine;
                 else if (low.Trim().StartsWith("[") && low.Trim().EndsWith("]"))
@@ -124,6 +136,7 @@ namespace Sushi.Net.Library.Events.Subtitles.Aegis
                 }
             }
 
+            ass.Events = ass.Events.OrderBy(a => a.Start).ToList();
             return ass;
         }
 
@@ -158,29 +171,30 @@ namespace Sushi.Net.Library.Events.Subtitles.Aegis
                 return ("pbo" + Mul(tag.Substring(3), multiplier), drawingmode);
             if (tag.StartsWith("fs") && !tag.StartsWith("fsc"))
                 return ("fs" + Mul(tag.Substring(2), multiplier), drawingmode);
-            if (tag.StartsWith("move(") && tag.EndsWith(")"))
+            if (tag.StartsWith("move("))// && tag.EndsWith(")"))
             {
-                string[] kk = tag.Substring(5, tag.Length - 6).Split(',');
+                string[] kk = tag.Substring(5, tag.Length - 5).Replace(")", "").Split(',');
                 for (int x = 0; x < 4; x++)
                     kk[x] = Mul(kk[x], multiplier);
                 return ("move(" + string.Join(",", kk) + ")", drawingmode);
             }
-            if (tag.StartsWith("pos(") && tag.EndsWith(")"))
-                return ("pos("+string.Join(",",tag.Substring(4, tag.Length - 5).Split(',').Select(a => Mul(a, multiplier))) + ")", drawingmode);
-            if (tag.StartsWith("org(") && tag.EndsWith(")"))
-                return ("org("+string.Join(",",tag.Substring(4, tag.Length - 5).Split(',').Select(a => Mul(a, multiplier))) + ")", drawingmode);
+            if (tag.StartsWith("pos("))// && tag.EndsWith(")"))
+
+                return ("pos("+string.Join(",",tag.Substring(4, tag.Length - 4).Replace(")","").Split(',').Select(a => Mul(a, multiplier))) + ")", drawingmode);
+            if (tag.StartsWith("org("))// && tag.EndsWith(")"))
+                return ("org("+string.Join(",",tag.Substring(4, tag.Length - 4).Replace(")", "").Split(',').Select(a => Mul(a, multiplier))) + ")", drawingmode);
             if (tag.StartsWith("clip("))
             {
                 string[] kk = tag.Substring(5, tag.Length - 6).Split(',');
                 if (kk.Length == 4)
-                    return ("clip(" + string.Join(",", tag.Substring(5, tag.Length - 6).Split(',').Select(a => Mul(a, multiplier))) + ")",drawingmode);
+                    return ("clip(" + string.Join(",", tag.Substring(5, tag.Length - 5).Replace(")", "").Split(',').Select(a => Mul(a, multiplier))) + ")",drawingmode);
                 return (ParseClipDrawing("clip(", kk,multiplier),drawingmode);
             }
             if (tag.StartsWith("iclip("))
             {
-                string[] kk = tag.Substring(6, tag.Length - 7).Split(',');
+                string[] kk = tag.Substring(6, tag.Length - 6).Replace(")", "").Split(',');
                 if (kk.Length == 4)
-                    return ("iclip(" + string.Join(",", tag.Substring(6, tag.Length - 7).Split(',').Select(a => Mul(a, multiplier))) + ")",drawingmode);
+                    return ("iclip(" + string.Join(",", tag.Substring(6, tag.Length - 6).Replace(")", "").Split(',').Select(a => Mul(a, multiplier))) + ")",drawingmode);
                 return (ParseClipDrawing("iclip(", kk,multiplier),drawingmode);
             }
 
@@ -247,48 +261,56 @@ namespace Sushi.Net.Library.Events.Subtitles.Aegis
         }
         private string ParseText(string text, float multiplier)
         {
-            StringBuilder ret = new StringBuilder();
-            bool drawingmode=false;
-            int cur = 0;
-            while(cur<text.Length)
+            try
             {
-                if (text[cur] == '{')
+                StringBuilder ret = new StringBuilder();
+                bool drawingmode = false;
+                int cur = 0;
+                while (cur < text.Length)
                 {
-                    int end = text.IndexOf("}",cur, StringComparison.InvariantCulture);
-                    if (end != -1)
+                    if (text[cur] == '{')
                     {
-                        string work = text.Substring(cur+1, end - (cur+1));
-                        if (work.IndexOf("\\",StringComparison.InvariantCulture) >= 0)
-                            (work,drawingmode) = ParseTags(work, drawingmode, multiplier);
-                        ret.Append("{"+work+"}");
-                        cur = end + 1;
-                        continue;
-                        
+                        int end = text.IndexOf("}", cur, StringComparison.InvariantCulture);
+                        if (end != -1)
+                        {
+                            string work = text.Substring(cur + 1, end - (cur + 1));
+                            if (work.IndexOf("\\", StringComparison.InvariantCulture) >= 0)
+                                (work, drawingmode) = ParseTags(work, drawingmode, multiplier);
+                            ret.Append("{" + work + "}");
+                            cur = end + 1;
+                            continue;
+
+                        }
                     }
+
+                    string nwork;
+                    int end2 = text.IndexOf("{", cur + 1, StringComparison.InvariantCulture);
+                    if (end2 >= 0)
+                    {
+                        nwork = text.Substring(cur, end2 - cur);
+                        cur = end2;
+                    }
+                    else
+                    {
+                        nwork = text.Substring(cur);
+                        cur = text.Length;
+                    }
+
+                    if (drawingmode)
+                        ret.Append(ParseDrawing(nwork, multiplier));
+                    else
+                        ret.Append(nwork);
                 }
 
-                string nwork;
-                int end2 = text.IndexOf("{", cur + 1,StringComparison.InvariantCulture);
-                if (end2 >= 0)
-                {
-                    nwork = text.Substring(cur, end2 - cur);
-                    cur=end2;
-                }
-                else
-                {
-                    nwork = text.Substring(cur);
-                    cur = text.Length;
-                }
-
-                if (drawingmode)
-                    ret.Append(ParseDrawing(nwork, multiplier));
-                else
-                    ret.Append(nwork);
+                return ret.ToString();
             }
-
-            return ret.ToString();
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+            return text;
         }
-        
+
         public void Resize(int width, int height, bool resize_borders)
         {
 

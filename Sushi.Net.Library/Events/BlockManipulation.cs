@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Sushi.Net.Library.Audio;
+using Sushi.Net.Library.Events.Audio;
 
 namespace Sushi.Net.Library.Events
 {
@@ -35,6 +36,32 @@ namespace Sushi.Net.Library.Events
             }
 
             return result;
+        }
+
+        public List<IShiftBlock> CreateBlocks(List<ComputedMovement> movements, float duration)
+        {
+            List<IShiftBlock> ret = new List<IShiftBlock>();
+
+            if (movements.Count == 0)
+                return ret;
+            if (movements[0].RelativePosition > 0)
+                ret.Add(new Block { Start = 0, End = movements[0].RelativePosition });
+            float advance = 0;
+            for(int x=0;x<movements.Count;x++)
+            {
+                float start = movements[x].RelativePosition+advance;
+                if (movements[x].Difference < 0)
+                {
+                    start -= movements[x].Difference;
+                    advance -= movements[x].Difference;
+                }
+                else
+                    ret.Add(new SilenceBlock { Duration = movements[x].Difference });
+                float end = movements.Count - 1 == x ? duration : movements[x + 1].RelativePosition+advance;
+                ret.Add(new Block { Start=start, End=end});
+            }
+            return ret;
+
         }
 
         public List<Split> CreateSplits(List<Event> events, float duration)

@@ -12,45 +12,44 @@ namespace Sushi.Net.Library.Decoding
 {
     public class Demuxer
     {
+        private FFProbe _probe;
         private FFMpeg _ffmpeg;
         private MkvExtract _extract;
         private SCXviD _scx;
         private ILogger _logger;
 
-        public Demuxer(FFMpeg ffmpeg, MkvExtract extract, SCXviD scx, ILogger<Demuxer> logger)
+        public Demuxer(FFMpeg ffmpeg, FFProbe probe, MkvExtract extract, SCXviD scx, ILogger<Demuxer> logger)
         {
             _ffmpeg = ffmpeg;
             _extract = extract;
             _scx = scx;
             _logger = logger;
+            _probe = probe;
         }
 
-        public Task<MediaInfo> GetMediaInfoAsync(string path)
+        public Task PopulateMediaInfoAsync(Mux info, string path)
         {
-            _logger.LogInformation($"Getting Media information for {path}");
-            return _ffmpeg.GetMediaInfoAsync(path);
+            return _probe.PopulateMediaInfoAsync(info, path);
         }
 
-        public Task<(List<(float start, float end)>,float vol)> FindSilencesAsync(string path, int? index, float silence_length, int silence_threshold)
-        {
-            return _ffmpeg.FindSilencesAsync(path, index, silence_length, silence_threshold);
-        }
+
         public async Task<Mux> CreateAsync(string path)
         {
             Mux m = new Mux(this, path, _logger);
             await m.GetMediaInfoAsync().ConfigureAwait(false);
             return m;
         }
-        public Task ShiftAudioAsync(Mux mux, string outputpath, List<Split> splits)
+
+        public Task ShiftAudioAsync(AudioMedia stream, string outputpath, List<IShiftBlock> blocks, string temppath)
         {
-            return _ffmpeg.ShiftAudioAsync(mux, outputpath, splits);
+            return _ffmpeg.ShiftAudioAsync(stream, outputpath, blocks, temppath);
         }
         internal async Task ProcessAsync(Mux mux)
         {
             
             if (mux.WriteChapters)
             {
-                Chapters chap = mux.MediaInfo.Chapters;
+                Chapters chap = mux.Chapters;
                 await File.WriteAllTextAsync(mux.ChaptersPath, chap.ToOgmChapter()).ConfigureAwait(false);
             }
             if (mux.MakeKeyframes)
@@ -60,9 +59,8 @@ namespace Sushi.Net.Library.Decoding
             {
                 if (mux.Path.GetExtension().ToLowerInvariant() == ".mkv")
                 {
-                    await _extract.ExtractTimeCodesAsync(mux.Path, mux.MediaInfo.Videos[0].Id, mux.TimeCodesPath).ConfigureAwait(false);
+                    await _extract.ExtractTimeCodesAsync(mux.Path, mux.Videos[0].Info.Id, mux.TimeCodesPath).ConfigureAwait(false);
                 }
-                mux.VideoStream = mux.MediaInfo.Videos[0];
             }
             
             _logger.LogInformation($"Demuxing/Converting {mux.Path}...");

@@ -350,18 +350,18 @@ namespace Sushi.Net.Library.Events
 
         private int FixBorder(List<Event> events, float media_diff)
         {
-            int count = 10;
-            if (events.Count < 100)
-                count = events.Count / 10;
-            if (count == 0)
-                return 0;
-            double last_ten_diff = events.Skip(events.Count - count).Select(a => a.Diff).ToArray().Median();
-            float diff_limit = Math.Min((float) last_ten_diff, media_diff);
+            //int count = 10;
+            //if (events.Count < 100)
+            //    count = events.Count / 10;
+            //if (count == 0)
+            //    return 0;
+            //double last_ten_diff = events.Skip(events.Count - count).Select(a => a.Diff).ToArray().Median();
+            //float diff_limit = Math.Min((float) last_ten_diff, media_diff);
             List<Event> broken = new List<Event>();
             foreach (Event evnt in events)
             {
-                float delta = evnt.Diff / diff_limit;
-                if (delta < 0.2 || delta > 5)
+                float delta = evnt.Diff / media_diff;
+                if (delta > 5)
                     broken.Add(evnt);
                 else
                 {
@@ -387,7 +387,7 @@ namespace Sushi.Net.Library.Events
         }
 
 
-        public float AverageShifts<T>(List<T> events) where T : Event
+        public static float AverageShifts<T>(List<T> events) where T : Event
         {
             List<T> nevents = events.Where(a => !a.Linked).ToList();
             if (nevents.Count <2)
@@ -400,7 +400,7 @@ namespace Sushi.Net.Library.Events
         }
 
 
-        public List<List<Event>> GroupWithChapters(List<Event> events, List<float> chapter_times, bool ignore_chapters, bool grouping, int smooth_radius, float allowedDistance, float max_group_std)
+        public List<List<Event>> GroupWithChapters(List<Event> events, List<float> chapter_times, bool ignore_chapters, bool grouping, int smooth_radius, float allowedDistance, float max_group_std, string text="lines")
         {
             if (grouping)
             {
@@ -429,7 +429,7 @@ namespace Sushi.Net.Library.Events
                     float start_shift = g[0].Shift;
                     float end_shift = g[^1].Shift;
                     float avg_shift = AverageShifts(g);
-                    _logger.LogInformation($"Group ({g[0].Start.FormatTime()}=>{g[^1].End.FormatTime()} to {g[0].ShiftedStart.FormatTime()}=>{g[^1].ShiftedEnd.FormatTime()}, lines: {g.Count,4:D}), shifts (start: {start_shift,15: 0.0000000000;-0.0000000000}, end: {end_shift,15: 0.0000000000;-0.0000000000}, average: {avg_shift,15: 0.0000000000;-0.0000000000})");
+                    _logger.LogInformation($"Group ({g[0].Start.FormatTime()}=>{g[^1].End.FormatTime()} to {g[0].ShiftedStart.FormatTime()}=>{g[^1].ShiftedEnd.FormatTime()}, {text}: {g.Count,4:D}), shifts (start: {start_shift,15: 0.0000000000;-0.0000000000}, end: {end_shift,15: 0.0000000000;-0.0000000000}, average: {avg_shift,15: 0.0000000000;-0.0000000000})");
                 }
 
                 return groups;
