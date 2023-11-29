@@ -180,7 +180,7 @@ namespace Sushi.Net.Library.Tools
           catch(Exception e)
 
           {
-                _logger.LogDebug("Exception Error: "+e.ToString(),e);
+                _logger.LogError("Exception Error: "+e.ToString(),e);
                 throw new SushiException("Couldn't invoke ffmpeg, check that it's installed");
           }
       }
@@ -252,9 +252,10 @@ namespace Sushi.Net.Library.Tools
                 Command cmd = Command.WithArguments(arguments);
                 await ExecuteAsync(cmd,true,new FFMpegPercentageProcessor()).ConfigureAwait(false);
             }
-            catch
+            catch(Exception e)
 
             {
+                _logger.LogError("Exception Error: " + e.ToString(), e);
                 throw new SushiException("Couldn't invoke ffmpeg, check that it's installed");
             }
         }
@@ -372,8 +373,9 @@ namespace Sushi.Net.Library.Tools
                 }
               
             }
-            catch
+            catch(Exception e)
             {
+                _logger.LogError("Exception Error: " + e.ToString(), e);
                 throw new SushiException("Couldn't invoke ffmpeg, check that it's installed");
             }
         }

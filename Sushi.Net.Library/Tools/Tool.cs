@@ -61,6 +61,7 @@ namespace Sushi.Net.Library.Tools
         {
             try
             {
+                _logger.LogDebug("CMD: "+cmd.ToString());
                 IProgress<int> pro = CreateProgress(percentageProcessor);
                 return await cmd.WithLogger(_logger, _cancellation.GetToken(), useStdError,percentageProcessor, pro, enc).ConfigureAwait(false);
             }

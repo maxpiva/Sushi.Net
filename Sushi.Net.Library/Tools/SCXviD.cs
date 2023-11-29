@@ -30,6 +30,7 @@ namespace Sushi.Net.Library.Tools
             _ffmpeg.CheckIfRequired(false);
             _logger.LogInformation($"Generating keyframes for {video_path}...");
             Command ffmpeg = _ffmpeg.Command.WithArguments("-i " + video_path.Quote() + " -f yuv4mpegpipe -vf scale=640:360 -pix_fmt yuv420p -vsync drop -").WithStandardErrorPipe(PipeTarget.ToStringBuilder(bld));
+            _logger.LogDebug("CMD: " + ffmpeg.ToString());
             IPercentageProcessor p = new FFMpeg.FFMpegPercentageProcessor();
             IProgress<int> pro = CreateProgress(p);
             ffmpeg = AddStandardErrorLogging(ffmpeg, p,pro);

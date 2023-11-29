@@ -48,6 +48,8 @@ namespace Sushi.Net.ConsoleFormatter
                 return;
             }
 
+            if (string.IsNullOrEmpty(message))
+                return;
             string nline = firstwrite ? "" : "\n";
             if (message == nline)
             {

@@ -47,7 +47,7 @@ namespace Sushi.Net.Library.Tools
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
+                _logger.LogError("Error getting media information. Exception: "+e);
                 throw;
             }
             if (b.chapters != null && b.chapters.Count > 0)
