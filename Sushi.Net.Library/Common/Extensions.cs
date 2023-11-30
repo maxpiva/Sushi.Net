@@ -42,6 +42,9 @@ namespace Sushi.Net.Library.Common
         public static string ToExtension(this string codec)
         {
             codec = codec.ToLowerInvariant();
+            if (codec.StartsWith("pcm_"))
+                // Use .wav for raw audio formats (http://trac.ffmpeg.org/wiki/audio%20types)
+                return ".wav";
             if (maps.ContainsKey(codec))
                 return maps[codec];
             return "." + codec;
