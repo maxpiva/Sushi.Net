@@ -12,6 +12,7 @@ using CliWrap;
 using CliWrap.EventStream;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using OpenCvSharp;
 using OpenCvSharp.ML;
 using Sushi.Net.Library.Audio;
 using Sushi.Net.Library.Decoding;
@@ -175,11 +176,23 @@ namespace Sushi.Net.Library.Common
                 throw new SushiException($"{title} file doesn't exist");
         }
 
+        public static string SanitizeFileName(this string filename)
+        {
+            foreach (char c in Path.GetInvalidFileNameChars())
+            {
+                if (filename.Contains(c))
+                    filename = filename.Replace(c.ToString(), "");
+            }
+            while (filename.Contains("  "))
+                filename = filename.Replace("  ", " ");
+            return filename;
+        }
         public static string FormatFullPath(this string base_path, string postfix, string temp_dir = null)
         {
+            string filename = (Path.GetFileNameWithoutExtension(base_path) + postfix).SanitizeFileName();
             if (!string.IsNullOrEmpty(temp_dir))
-                return Path.Combine(temp_dir, Path.GetFileNameWithoutExtension(base_path) + postfix);
-            return Path.Combine(Path.GetDirectoryName(base_path),Path.GetFileNameWithoutExtension(base_path) + postfix);
+                return Path.Combine(temp_dir, filename);
+            return Path.Combine(Path.GetDirectoryName(base_path), filename);
         }
         public static void ProcessProgress(this IPercentageProcessor processor, string text, IProgress<int> progress)
         {
