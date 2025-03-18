@@ -37,6 +37,24 @@ namespace Sushi.Net.Library.Media
         public int? SampleRate { get; set; }
         public MediaStreamType MediaType { get; set; }
 
+        public string FrameRate { get; set; }
+
+        public double FrameRateValue
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(FrameRate))
+                    return 0;
+                string[] parts = FrameRate.Split('/');
+                if (parts.Length != 2)
+                    return double.Parse(FrameRate);
+                if (!float.TryParse(parts[0], out float num))
+                    return 0;
+                if (!float.TryParse(parts[1], out float den))
+                    return 0;
+                return num / den;
+            }
+        }
 
         internal MediaStreamInfo()
         {

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -19,6 +20,7 @@ using Sushi.Net.Library.Decoding;
 using Sushi.Net.Library.Events;
 using Sushi.Net.Library.Events.Audio;
 using Sushi.Net.Library.Media;
+using Sushi.Net.Library.Providers;
 using Thinktecture.Extensions.Configuration;
 using static Sushi.Net.Library.Events.Shifter;
 
@@ -54,27 +56,30 @@ namespace Sushi.Net.Library.Tools
         private static string filtervoice = "bandreject=\"f=900:width_type=h:w=600\"";
 
         private static string downmux = "pan=\"1c|c0=0.5*FL+0.5*FR\"";
-        //private static string invertright = "pan=\"stereo|c0=c0|c1=-1*c1\"";
-      /*
-        public async Task<(List<(float start, float end)>,float vol)> FindSilencesAsync(string file, int? index, float silence_length, int silence_threshold)
-        {
-            CheckIfRequired(false);
-            _logger.LogInformation("Finding maximum volume...");
-            Command cmd = Command.WithArguments("-hide_banner -i " + file.Quote()+" -vn -sn -dn -af volumedetect -f null -").WithValidation(CommandResultValidation.None);
-            string res=await ExecuteAsync(cmd,true, new FFMpegPercentageProcessor()).ConfigureAwait(false);
-            Match vol = VolumeRegex.Match(res);
-            if (!vol.Success)
-                throw new SushiException($"Unable to find {file} volume");
-            float val = -float.Parse(vol.Groups[1].Value.Trim());
-            _logger.LogInformation($"Volume {-val}db. Finding silences...");
-            cmd = Command.WithArguments($"-hide_banner -i " + file.Quote() + $" -vn -sn -dn -af volume=volume={val.ToString(CultureInfo.InvariantCulture)}dB,silencedetect=noise={silence_threshold}dB:d={silence_length.ToString(CultureInfo.InvariantCulture)} -f null -").WithValidation(CommandResultValidation.None);
-            res=await ExecuteAsync(cmd, true, new FFMpegPercentageProcessor()).ConfigureAwait(false);
-            MatchCollection coll = SilenceRegex.Matches(res);
-            return (coll.Select(a => (float.Parse(a.Groups[1].Value), float.Parse(a.Groups[2].Value))).ToList(), val);
-        }
-        */
 
-      public async Task ShiftAudioAsync(Decoding.AudioMedia stream, string path, List<IShiftBlock> blocks, string temppath)
+        private static string tempo = "atempo={0}";
+
+        //private static string invertright = "pan=\"stereo|c0=c0|c1=-1*c1\"";
+        /*
+          public async Task<(List<(float start, float end)>,float vol)> FindSilencesAsync(string file, int? index, float silence_length, int silence_threshold)
+          {
+              CheckIfRequired(false);
+              _logger.LogInformation("Finding maximum volume...");
+              Command cmd = Command.WithArguments("-hide_banner -i " + file.Quote()+" -vn -sn -dn -af volumedetect -f null -").WithValidation(CommandResultValidation.None);
+              string res=await ExecuteAsync(cmd,true, new FFMpegPercentageProcessor()).ConfigureAwait(false);
+              Match vol = VolumeRegex.Match(res);
+              if (!vol.Success)
+                  throw new SushiException($"Unable to find {file} volume");
+              float val = -float.Parse(vol.Groups[1].Value.Trim());
+              _logger.LogInformation($"Volume {-val}db. Finding silences...");
+              cmd = Command.WithArguments($"-hide_banner -i " + file.Quote() + $" -vn -sn -dn -af volume=volume={val.ToString(CultureInfo.InvariantCulture)}dB,silencedetect=noise={silence_threshold}dB:d={silence_length.ToString(CultureInfo.InvariantCulture)} -f null -").WithValidation(CommandResultValidation.None);
+              res=await ExecuteAsync(cmd, true, new FFMpegPercentageProcessor()).ConfigureAwait(false);
+              MatchCollection coll = SilenceRegex.Matches(res);
+              return (coll.Select(a => (float.Parse(a.Groups[1].Value), float.Parse(a.Groups[2].Value))).ToList(), val);
+          }
+          */
+
+      public async Task ShiftAudioAsync(Decoding.AudioMedia stream, string path, List<IShiftBlock> blocks, string temppath, float minmalms)
       {
             try
             {
@@ -85,69 +90,108 @@ namespace Sushi.Net.Library.Tools
                     p = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString().Replace("-", ""));
                     Directory.CreateDirectory(p);
                 }
-                CheckIfRequired(false);
-                List<string> dellist=new List<string>();
-                string joint = Path.Combine(p, Path.GetFileNameWithoutExtension(path) + ".script");
-                dellist.Add(joint);
-                int cnt = 0;
-                StringBuilder parts = new StringBuilder();
-                double acc = 100d / ((double)blocks.Count+1);
-                double ct = 0;
+                float min = minmalms / 1000;
+                float distance = 0;
+                float distance2 = 0;
                 foreach (IShiftBlock b in blocks)
                 {
-                    string filename = Path.GetFileNameWithoutExtension(path);
-                    string ext = Path.GetExtension(path);
-                    string current = Path.Combine(p, filename + $"_{cnt:000}" + ext);
-                    StringBuilder bld = new StringBuilder();
-                    SilenceBlock s = b as SilenceBlock;
-                    Block bb = b as Block;
-                    if (s != null)
+                    SilenceBlock sb1 = b as SilenceBlock;
+                    Block bb1 = b as Block;
+                    float current=0;
+                    if (sb1 != null)
                     {
-                        bld.Append("-y -f lavfi -i anullsrc");
-                        long duration = (long)(s.Duration * 1000000);
-                        if (stream.Info.SampleRate.HasValue || !string.IsNullOrEmpty(stream.Info.ChannelLayout))
-                        {
-                            bld.Append("=");
-                        }
-                        if (!string.IsNullOrEmpty(stream.Info.ChannelLayout))
-                        {
-                            bld.Append("channel_layout=" + stream.Info.ChannelLayout);
-                            if (stream.Info.SampleRate.HasValue)
-                                bld.Append(":");
-                        }
-                        if (stream.Info.SampleRate.HasValue)
-                        {
-                            bld.Append("sample_rate=" + stream.Info.SampleRate.Value);
-                        }
-                        bld.Append($" -c:a {stream.Info.CodecName}");
-                        if (stream.Info.BitRate != 0)
-                            bld.Append($" -b:a {stream.Info.BitRate}");
-                        bld.Append($" -t {duration}us ");
-                        bld.Append(current.Quote());
+                        distance = +sb1.Duration;
+                        current = Math.Abs(sb1.Duration);
                     }
-                    else if (bb != null && bb.Start<bb.End)
+                    else if (bb1 != null)
                     {
-                        bld.Append("-hide_banner -i " + stream.Mux.Path.Quote() + " -y ");
-                        bld.Append($"-map 0:a:{stream.Mux.Audios.IndexOf(stream)} ");
-                        long ustart = (long)(bb.Start * 1000000);
-                        long uend = (long)(bb.End * 1000000);
-                        bld.Append("-ss " + ustart + "us -to " + uend + "us -c:a copy ");
-                        bld.Append(current.Quote());
+                        distance = +bb1.Shift;
+                        current = Math.Abs(bb1.Shift);
                     }
-                    ct += acc;
-                    proc.SetValue((int)ct);
-                    if (bld.Length > 0)
-                    {
-                        cnt++;
-                        _logger.LogDebug("ffmpeg args: " + bld.ToString());
-                        Command cmd = Command.WithArguments(bld.ToString());
-                        await ExecuteAsync(cmd, true, proc).ConfigureAwait(false);
-                        parts.AppendLine("file " + current.Quote('\''));
-                        dellist.Add(current);
-                    }
+                    if (current> distance2)
+                        distance2 = current;
                 }
-                File.WriteAllText(joint, parts.ToString());
-                string concat = "-hide_banner -y -safe 0 -f concat -i " + joint.Quote() + " -c copy " + path.Quote();
+
+                distance = Math.Abs(distance);
+                CheckIfRequired(false);
+                List<string> dellist = new List<string>();
+                string concat;
+                if (distance < min && distance2 < min)
+                {
+                    _logger.LogInformation($"Skipping rejoin, shift is less than {minmalms}ms.");
+                    StringBuilder bld = new StringBuilder();
+                    bld.Append("-hide_banner -i " + stream.Mux.Path.Quote() + " -y ");
+                    bld.Append($"-map 0:a:{stream.Mux.Audios.IndexOf(stream)} -c:a copy {path.Quote()}");
+                    concat = bld.ToString();
+                }
+                else
+                {
+                    string joint = Path.Combine(p, Path.GetFileNameWithoutExtension(path) + ".script");
+                    dellist.Add(joint);
+                    int cnt = 0;
+                    StringBuilder parts = new StringBuilder();
+                    double acc = 100d / ((double)blocks.Count + 1);
+                    double ct = 0;
+                    foreach (IShiftBlock b in blocks)
+                    {
+                        string filename = Path.GetFileNameWithoutExtension(path);
+                        string ext = Path.GetExtension(path);
+                        string current = Path.Combine(p, filename + $"_{cnt:000}" + ext);
+                        StringBuilder bld = new StringBuilder();
+                        SilenceBlock s = b as SilenceBlock;
+                        Block bb = b as Block;
+                        if (s != null)
+                        {
+                            bld.Append("-y -f lavfi -i anullsrc");
+                            long duration = (long)(s.Duration * 1000000);
+                            if (stream.Info.SampleRate.HasValue || !string.IsNullOrEmpty(stream.Info.ChannelLayout))
+                            {
+                                bld.Append("=");
+                            }
+                            if (!string.IsNullOrEmpty(stream.Info.ChannelLayout))
+                            {
+                                bld.Append("channel_layout=" + stream.Info.ChannelLayout);
+                                if (stream.Info.SampleRate.HasValue)
+                                    bld.Append(":");
+                            }
+                            if (stream.Info.SampleRate.HasValue)
+                            {
+                                bld.Append("sample_rate=" + stream.Info.SampleRate.Value);
+                            }
+
+                            string codecc = stream.Info.CodecName;
+                            if (codecc == "opus")
+                                codecc = "libopus";
+                            bld.Append($" -c:a {codecc}");
+                            if (stream.Info.BitRate != 0)
+                                bld.Append($" -b:a {stream.Info.BitRate}");
+                            bld.Append($" -t {duration}us ");
+                            bld.Append(current.Quote());
+                        }
+                        else if (bb != null && bb.Start < bb.End)
+                        {
+                            bld.Append("-hide_banner -i " + stream.Mux.Path.Quote() + " -y ");
+                            bld.Append($"-map 0:a:{stream.Mux.Audios.IndexOf(stream)} ");
+                            long ustart = (long)(bb.Start * 1000000);
+                            long uend = (long)(bb.End * 1000000);
+                            bld.Append("-ss " + ustart + "us -to " + uend + "us -c:a copy ");
+                            bld.Append(current.Quote());
+                        }
+                        ct += acc;
+                        proc.SetValue((int)ct);
+                        if (bld.Length > 0)
+                        {
+                            cnt++;
+                            _logger.LogDebug("ffmpeg args: " + bld.ToString());
+                            Command cmd = Command.WithArguments(bld.ToString());
+                            await ExecuteAsync(cmd, true, proc).ConfigureAwait(false);
+                            parts.AppendLine("file " + current.Replace("'", "'\\''").Quote('\''));
+                            dellist.Add(current);
+                        }
+                    }
+                    File.WriteAllText(joint, parts.ToString());
+                    concat = "-hide_banner -y -safe 0 -f concat -i " + joint.Quote() + " -c copy " + path.Quote();
+                }
                 _logger.LogDebug("ffmpeg args: " + concat);
                 Command cmd2 = Command.WithArguments(concat);
                 proc.SetValue(100);
@@ -320,6 +364,8 @@ namespace Sushi.Net.Library.Tools
             {
 
                 List<string> args = new List<string>();
+                if (mux.LimitSeconds > 0)
+                    args.Add("-t " + mux.LimitSeconds);
                 args.Add("-hide_banner -i " + mux.Path.Quote() + " -y");
                 CheckIfRequired(false);
                 Dictionary<string, AudioMedia> audios = new Dictionary<string, AudioMedia>();
@@ -335,6 +381,8 @@ namespace Sushi.Net.Library.Tools
 
                     args.Add($"-map 0:{s.Info.Id}");
                     List<string> filters = new List<string>();
+                    if (mux.ReScale != 0)
+                        filters.Add(string.Format(tempo, mux.ReScale));
                     if (s.VoiceRemoval)
                         filters.Add(filtervoice);
                     if (s.DownMixStereo)
@@ -371,7 +419,24 @@ namespace Sushi.Net.Library.Tools
                     }
                     s.Processed = true;
                 }
-              
+
+                if (mux.ReScale != 0 && mux.Subtitles != null && mux.Subtitles.Count > 0)
+                {
+                    _logger.LogInformation("Rescaling Source subtitles to destination frame-rate");
+                    foreach (SubtitleMedia s in mux.Subtitles.Where(a => a.ShouldProcess))
+                    {
+                        SubtitleProvider prov = new SubtitleProvider(s);
+                        IEvents events=await prov.ObtainAsync();
+                        double rescale = 1 / mux.ReScale;
+                        foreach (Event ev in events.Events)
+                        {
+                            ev.Start = (float)(ev.Start * rescale);
+                            ev.End = (float)(ev.End * rescale);
+                        }
+                        await events.SaveAsync(s.ProcessPath);
+                    }
+                }
+
             }
             catch(Exception e)
             {
@@ -419,9 +484,12 @@ namespace Sushi.Net.Library.Tools
                     Match time = CurrentRegex.Match(line);
                     if (time.Success && _duration>0)
                     {
-                        float r=time.Groups[1].Value.Trim().ParseAssTime();
-                        r = r * 100 / _duration;
-                        _lastval = (int) Math.Round(r);
+                        if (time.Groups[1].Value != "N/A")
+                        {
+                            float r = time.Groups[1].Value.Trim().ParseAssTime();
+                            r = r * 100 / _duration;
+                            _lastval = (int)Math.Round(r);
+                        }
                     }
                 }
                 return Math.Min(_lastval,100);

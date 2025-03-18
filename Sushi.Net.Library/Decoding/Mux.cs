@@ -28,6 +28,22 @@ namespace Sushi.Net.Library.Decoding
         public string AudioOutputCodecParameters { get; set;}
         public Demuxer Demuxer => _demuxer;
 
+        public double ReScale { get; set; } = 0d;
+
+        public int LimitSeconds = 0;
+
+        public Mux CloneForSync(int? audio_id)
+        {
+            Mux n = new Mux(_demuxer,Path,_logger);
+            n.Videos = n.Videos.ToList();
+            n.LimitSeconds = 0;
+            
+            n.Audios = new List<AudioMedia> { this.SelectStream<AudioMedia>(Audios, audio_id, "audio") };
+            n.AudioOutputCodec = AudioOutputCodec;
+            n.AudioOutputCodecParameters = AudioOutputCodecParameters;
+            return n;
+        }
+
         internal Mux(Demuxer demuxer, string path, ILogger logger)
         {
             _logger = logger;
@@ -85,8 +101,7 @@ namespace Sushi.Net.Library.Decoding
                 media = Audios.FirstOrDefault(a => a.Info.Id == index.Value);
             if (media == null)
                 throw new ArgumentException($"Cannot find audio with index {index.Value}");
-            return 
-                Audios.IndexOf(media) + 1;
+            return Audios.IndexOf(media);
         }
 
         public Media GetShiftableMedia(int idx)

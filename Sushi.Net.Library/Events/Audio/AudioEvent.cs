@@ -19,13 +19,15 @@ namespace Sushi.Net.Library.Events.Audio
         }
         public override Event Clone()
         {
-            return new AudioEvent()
+            AudioEvent ev =new AudioEvent()
             {
                 Text = this.Text,
                 End = this.End,
                 SourceIndex = this.SourceIndex,
-                Start = this.Start
+                Start = this.Start,
             };
+            ev.SetShift(this.Shift, this.Diff);
+            return ev;
         }
 
 

@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Sushi.Net.Library.Common;
 
@@ -18,6 +19,7 @@ namespace Sushi.Net.Library.Events.Subtitles.Aegis
         }
 
         public ScriptInfoList ScriptInfo { get; } = new();
+        public GarbageList Garbage { get;} = new();
         public FontStyles Styles { get; } = new();
         public SortedDictionary<string, List<string>> Other { get; } = new();
         public List<Event> Events { get; set; } = new();
@@ -32,7 +34,10 @@ namespace Sushi.Net.Library.Events.Subtitles.Aegis
             {
                 bld.AppendLine(ScriptInfo.ToString());
             }
-
+            if (Garbage.Count > 0)
+            {
+                bld.AppendLine(Garbage.ToString());
+            }
             if (Styles.Count > 0)
             {
                 bld.AppendLine(Styles.ToString());
@@ -65,7 +70,10 @@ namespace Sushi.Net.Library.Events.Subtitles.Aegis
                 return;
             ass.ScriptInfo.Add(line);
         }
-
+        private static void ParseGarbageLine(AegisSubtitles ass, string line)
+        {
+            ass.Garbage.Add(line);
+        }
 
         private static void ParseStyleLine(AegisSubtitles ass, string line)
         {
@@ -84,6 +92,9 @@ namespace Sushi.Net.Library.Events.Subtitles.Aegis
                 ass._subsParser = new AegisSubtitleParser(line);
                 return;
             }
+
+            if (line.StartsWith("{"))
+                return;
             ass.Events.Add(ass._subsParser.CreateSubtitle(line, ass.Events.Count + 1));
         }
 
@@ -112,15 +123,19 @@ namespace Sushi.Net.Library.Events.Subtitles.Aegis
                     func = ParseScriptInfoLine;
                 else if (low == "[v4+ styles]" || low == "[v4 styles]")
                 {
-                    ass.Styles.V4Version = low;
+                    ass.Styles.V4Version = line;
                     func = ParseStyleLine;
                 }
+                else if (low == "[aegisub project garbage]")
+                    func = ParseGarbageLine;
                 else if (low == "[events]")
                     func = ParseEventLine;
                 else if (low.Trim().StartsWith("[") && low.Trim().EndsWith("]"))
                 {
                     func = CreateGenericParse(ass, line);
                 }
+                else if (func==null && low.StartsWith(";"))
+                    continue;
                 else if (func == null)
                     throw new SushiException("That's some invalid ASS script");
                 else
@@ -200,7 +215,10 @@ namespace Sushi.Net.Library.Events.Subtitles.Aegis
 
             if (tag.StartsWith("p"))
             {
-                drawingmode = int.Parse(tag.Substring(1)) != 0;
+                if (tag.EndsWith(")"))
+                    tag=tag.Substring(0, tag.Length - 1);
+                if (tag.Length>1)
+                    drawingmode = int.Parse(tag.Substring(1)) != 0;
             }
             return (tag,drawingmode);
         }
@@ -273,12 +291,21 @@ namespace Sushi.Net.Library.Events.Subtitles.Aegis
                         int end = text.IndexOf("}", cur, StringComparison.InvariantCulture);
                         if (end != -1)
                         {
-                            string work = text.Substring(cur + 1, end - (cur + 1));
-                            if (work.IndexOf("\\", StringComparison.InvariantCulture) >= 0)
-                                (work, drawingmode) = ParseTags(work, drawingmode, multiplier);
-                            ret.Append("{" + work + "}");
-                            cur = end + 1;
-                            continue;
+                            try
+                            {
+                                string work = text.Substring(cur + 1, end - (cur + 1));
+                                if (work.IndexOf("\\", StringComparison.InvariantCulture) >= 0)
+                                    (work, drawingmode) = ParseTags(work, drawingmode, multiplier);
+                                ret.Append("{" + work + "}");
+                                cur = end + 1;
+                                continue;
+                            }
+                            catch (Exception e)
+                            {
+                                int a1 = 1;
+                            }
+
+                            int b = 1;
 
                         }
                     }
@@ -311,6 +338,33 @@ namespace Sushi.Net.Library.Events.Subtitles.Aegis
             return text;
         }
 
+        private Regex fn = new Regex("\\fn(.*?)(\\|})", RegexOptions.Compiled | RegexOptions.Singleline);
+        public List<string> CollectFonts()
+        {
+            List<string> usedStyles = Events.Cast<AegisSubtitle>().Where(a=>!a.IsComment).Select(a=>a.Style.ToLowerInvariant()).Distinct().ToList();
+            HashSet<string> fonts = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase);
+            foreach (string s in this.Styles.Where(a => usedStyles.Contains(a.Name.ToLowerInvariant()))
+                         .Select(a => a.FontName).Distinct())
+            {
+                if (!fonts.Contains(s))
+                    fonts.Add(s);
+            }
+            List<string> allText = Events.Cast<AegisSubtitle>().Where(a => !a.IsComment).Select(a => a.Text).ToList();
+            foreach (string n in allText)
+            {
+                MatchCollection mc = fn.Matches(n);
+                foreach (Match m in mc)
+                {
+                    if (m.Success)
+                    {
+                        string font = m.Groups[1].Value;
+                        if (!string.IsNullOrEmpty(font) && !fonts.Contains(font))
+                            fonts.Add(font);
+                    }
+                }
+            }
+            return fonts.ToList();
+        }
         public void Resize(int width, int height, bool resize_borders)
         {
 
@@ -318,10 +372,10 @@ namespace Sushi.Net.Library.Events.Subtitles.Aegis
                 return;
             if (ScriptInfo.Width == width && ScriptInfo.Height == height)
                 return;
-            float multiplier=width/(float)ScriptInfo.Width;
+            float multiplier=(float)width/(float)ScriptInfo.Width;
             if (height/(float)ScriptInfo.Height<multiplier)
-                multiplier = height / (float)ScriptInfo.Height;
-            ScriptInfo.Width=width;
+                multiplier = (float)height / (float)ScriptInfo.Height;
+            ScriptInfo.Width = width;
             ScriptInfo.Height = height;
             foreach(FontStyle style in Styles)
             {

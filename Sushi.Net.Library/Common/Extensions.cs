@@ -37,7 +37,15 @@ namespace Sushi.Net.Library.Common
                 ".ass"},
             {
                 "subrip",
-                ".srt"}};
+                ".srt"
+            },            {
+                "text",
+                ".srt"
+            },
+
+
+
+        };
 
         public static string ToExtension(this string codec)
         {
@@ -106,7 +114,7 @@ namespace Sushi.Net.Library.Common
         {
             if (str == null)
                 return null;
-            return str.Trim(new char[] {'"', '\'', ' '});
+            return str.Trim(new char[] {'"', '\'', ' ','\0'});
         }
 
         public static string Quote(this string str, char quote = '"')

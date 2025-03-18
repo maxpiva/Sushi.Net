@@ -201,7 +201,7 @@ namespace Sushi.Net.Library.Events.Audio
             return null;
             
         }
-        public List<ComputedMovement> AddStream(AudioMedia media, float maxseconds)
+        public List<ComputedMovement> AddStream(AudioMedia media, List<Event> events, float maxseconds)
         {
             float startpos = 0;
             float last = 0;
@@ -209,11 +209,11 @@ namespace Sushi.Net.Library.Events.Audio
             List<ComputedMovement> movs = new List<ComputedMovement>();
             Streams.Add(media, movs);
             List<string> second = new List<string>();
-            for(int x=0;x<AudioEvents.Events.Count;x++)
+            for(int x=0;x<events.Count;x++)
             {
                 ComputedMovement mov = new ComputedMovement();
 
-                Event ev = AudioEvents.Events[x];
+                Event ev = events[x];
                 float start = startpos;
                 float end = ev.ShiftedStart;
                 (float sstart, float ssend, bool warn) = FindInSilences(media.Silences, start, end, maxseconds);

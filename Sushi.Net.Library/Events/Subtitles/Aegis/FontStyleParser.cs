@@ -66,11 +66,13 @@ namespace Sushi.Net.Library.Events.Subtitles.Aegis
                             style.PrimaryColor = par;
                             break;
                         case "SECONDARYCOLOUR":
-                            case "SECONDARYCOLOR":
+                        case "SECONDARYCOLOR":
                             style.SecondaryColor = par;
                             break;
                         case "TERTIARYCOLOUR":
                         case "TERTIARYCOLOR":
+                        case "OUTLINECOLOUR":
+                        case "OUTLINECOLOR":
                             style.OutlineColor = par;
                             break;
                         case "BACKCOLOUR":
@@ -211,6 +213,9 @@ namespace Sushi.Net.Library.Events.Subtitles.Aegis
                         break;
                     case "ALIGNMENT":
                         bld.Append(style.Alignment.ToString(CultureInfo.InvariantCulture));
+                        break;
+                    case "SPACING":
+                        bld.Append(style.Spacing.ToString(CultureInfo.InvariantCulture));
                         break;
                     case "MARGINL":
                         bld.Append(style.MarginLeft.ToString("D4"));

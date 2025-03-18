@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Extensions.Logging;
+using OpenCvSharp.Features2D;
 using Sushi.Net.Library.Common;
 using Sushi.Net.Library.LibIO;
 using Sushi.Net.Library.Timecoding;
@@ -236,6 +237,8 @@ namespace Sushi.Net.Library.Events
                 List<float> shifts = InterpolateNones(preshifts, times);
                 if (shifts.Count > 0)
                 {
+
+
                     float mean_shift = shifts.ToArray().Mean();
                     List<(float start, float end)> fl = new();
                     for (int x = 0; x < shifts.Count; x += 2)

@@ -17,7 +17,7 @@ namespace Sushi.Net.Library.Script
     public class Script : BasicParser
     {
         public Mux Mux { get; private set; }
-        public List<StreamCommands> Streams { get; }
+        public List<StreamCommands> Streams { get; set; }
         private Demuxer _demuxer;
         private ILogger _logger;
         private bool _muxFound;
@@ -25,6 +25,8 @@ namespace Sushi.Net.Library.Script
         private StreamCommands _current;
         private float SubtitleDelay { get; set;}
         public float Duration { get; set;}
+
+        public double ReScale { get; set; }
         public int Width { get; set; }
         public int Height { get; set; }
         public static async Task<Script> ParseScriptAsync(Demuxer demuxer, ILogger logger,  List<string> lines)
@@ -43,6 +45,7 @@ namespace Sushi.Net.Library.Script
             s.Duration = duration;
             s.Width = width;
             s.Height = height;
+            s.ReScale = mux.ReScale;
             foreach (List<ComputedMovement> m in movements.Keys)
             {
                 StreamCommands cmd = new StreamCommands(movements[m], m);
@@ -176,7 +179,8 @@ namespace Sushi.Net.Library.Script
 
             foreach (StreamCommands str in Streams)
             {
-                str.Commands[0].Time = 0;
+                if (str.Commands.Count>0)
+                    str.Commands[0].Time = 0;
                 List<IShiftBlock> blocks = GetBlocks(str);
                 foreach (SubtitleMedia media in str.Medias.Where(a => a is SubtitleMedia).Cast<SubtitleMedia>())
                 {
@@ -280,19 +284,22 @@ namespace Sushi.Net.Library.Script
                     int.TryParse(command[1], out width);
                     Width = width;
                     int height = 0;
-                    int.TryParse(command[1], out height);
+                    int.TryParse(command[2], out height);
                     Height = height;
                     break;
-
                 case "P":
                     if (command.Length < 2)
-                        throw new ArgumentException("File Command should contains the duration and optionaly the subtitle delay.");
+                        throw new ArgumentException("File Command should contains the duration and optionally the subtitle delay and rescaling.");
                     float subd = 0;
                     float.TryParse(command[1], out subd);
                     Duration = subd;
                     subd = 0;
                     if (command.Length >= 3)
                         float.TryParse(command[2], out subd);
+                    double rescale = 0;
+                    if (command.Length >= 4)
+                        double.TryParse(command[3], out rescale);
+                    ReScale = rescale;
                     SubtitleDelay = subd;
                     break;
                 case "S":
@@ -358,7 +365,7 @@ namespace Sushi.Net.Library.Script
             l.Add("// R width height - Destination Video Resolution, important if you want to resize the subtitles");
             l.Add("// Example:    R 1920 1080");
             l.Add("//");
-            l.Add("// P duration subtitle_audio_adjust - Stream duration & Subtitle audio adjust in seconds.");
+            l.Add("// P duration subtitle_audio_adjust - Stream duration & Subtitle audio adjust in seconds and possible rescaling");
             l.Add("// Example:    P 2812.23 0");
             l.Add("//");
             l.Add("// I comma separated stream indexes to process.  ");
@@ -394,8 +401,10 @@ namespace Sushi.Net.Library.Script
             ls.Add($"F {Mux.Path.Quote()}");
             ls.Add($"R {Width} {Height}");
             string pbase = $"P {Duration.ToString(CultureInfo.InvariantCulture)}";
-            if (SubtitleDelay != 0)
+            if (SubtitleDelay != 0 || ReScale!=0)
                 pbase+=$" {SubtitleDelay.ToString(CultureInfo.InvariantCulture)}";
+            if (ReScale!=0)
+                pbase += $" {ReScale:F8}";
             ls.Add(pbase);
             foreach (StreamCommands cmds in Streams)
                 ls.AddRange(cmds.Serialize(absolute));

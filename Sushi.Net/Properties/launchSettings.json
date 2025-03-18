@@ -2,7 +2,7 @@
   "profiles": {
     "Sushi.Net": {
       "commandName": "Project",
-      "commandLineArgs": ""
+      "commandLineArgs": "--algo audio --no-chapters --src \"\\\\winserv\\downloads\\tosort\\[SR] Sailor Moon R - 47.mkv\" --src-audio 3 --dst \"\\\\winserv\\downloads\\tosort\\Sailor Moon - 47.DONE.mkv\" -o SAILOR"
     }
   }
 }

@@ -137,7 +137,7 @@ namespace Sushi.Net.Library.Settings
 
         [CommandLine("--output", null, "Output path.", "directory", false, false, "-o")]
         public string Output { get; set; }
-        [CommandLine("--use-destinations-names", true, "Use destination source name for ouyput files.")]
+        [CommandLine("--use-destinations-names", true, "Use destination source name for output files.")]
 
         public bool UseDestinationNames { get; set; }
         [CommandLine("--script-file", null, "Script File. [Only for audio Algo]", "filename", false, false, "-s")]
@@ -145,6 +145,9 @@ namespace Sushi.Net.Library.Settings
         [CommandLine("--absolute-times", false, "Script will have absolute times [Only for audio Algo]")]
         public bool AbsoluteTimes { get; set; }
 
+
+        [CommandLine("--subtitle-streams", null, "Only use this subtitle stream to calculate audio blocks [Only for subtitle Algo]",null, false, false)]
+        public string SubtitleStreams { get; set; }
         [CommandLine("--verbose", false, "Enable verbose logging.", null, false, false, "-v")]
         public bool Verbose { get; set; }
         [CommandLine("--verbose-verbose", false, "Enable more verbose logging.", null, false, false, "-vv")]
@@ -155,5 +158,12 @@ namespace Sushi.Net.Library.Settings
         [CommandLine("--dry-run", false, "Run the program without output.")]
         public bool DryRun { get; set; }
 
+        [CommandLine("--only-extract", false,"Only extract subtitles")]
+        public bool OnlyExtract { get; set; }
+
+        [CommandLine("--src-multi-sync", 0, "Re-Sync multiple source audio sources against the main source, seconds to scan","seconds")]
+        public int SrcMultiSync { get; set; }
+        [CommandLine("--minimal-audio-shift",15, "Minimal Audio shift to execute an audio shifting (only when is only one block)","milliseconds")]
+        public float MinimalAudioShift { get; set; }
     }
 }

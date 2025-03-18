@@ -21,8 +21,8 @@ namespace Sushi.Net.Library.Tools
     {
         public const string ffprobe = "ffprobe";
         private static readonly Regex Start = new Regex(@"dts=(.*)", RegexOptions.Compiled);
-
-        private static readonly string info= "-hide_banner -v quiet -print_format json -show_format -show_entries stream=index,codec_name,codec_type,width,height,sample_rate,channels,channel_layout,start_time,duration,bit_rate -show_entries stream_tags=title,language,handler_name -show_entries stream_disposition=default,forced,comment,hearing_impaired -show_entries chapters";
+        private static readonly string info = "-hide_banner -v quiet -print_format json -show_format -show_streams -count_packets -show_entries chapters";
+        //private static readonly string info= "-hide_banner -v quiet -print_format json -show_format -show_entries stream=index,codec_name,codec_type,width,height,sample_rate,channels,channel_layout,start_time,duration,bit_rate,avg_frame_rate -show_entries stream_tags=title,language,handler_name -show_entries stream_disposition=default,forced,comment,hearing_impaired -show_entries chapters";
 
 
         public FFProbe(ILogger<FFProbe> logger, IProgressLoggerFactory fact, IGlobalCancellation cancel, ILoggingConfiguration cfg) : base(logger, fact, cancel, cfg, ffprobe)
@@ -68,7 +68,6 @@ namespace Sushi.Net.Library.Tools
                 m.Comment = (s.disposition?.comment ?? 0) == 1;
                 m.HearingImpaired = (s.disposition?.hearing_impaired ?? 0) == 1;
                 m.Language = s.tags?.language;
-
                 m.Title = s.tags?.title;
                 if (!string.IsNullOrEmpty(s.start_time) && float.TryParse(s.start_time, out float re))
                     m.StartTime = re;
@@ -77,6 +76,12 @@ namespace Sushi.Net.Library.Tools
                     du = d2;
                 m.Duration = du;
                 m.Extension = s.codec_name?.ToExtension();
+                if (s.avg_frame_rate!=null && s.avg_frame_rate!="0/0")
+                    m.FrameRate = s.avg_frame_rate;
+                else if (s.r_frame_rate!= null && s.r_frame_rate != "0/0")
+                    m.FrameRate = s.r_frame_rate;
+                else if (m.Duration>0 && s.nb_read_packets!=null && long.TryParse(s.nb_read_packets, out long pack) && pack>0)
+                    m.FrameRate = ((double)pack/(double)m.Duration).ToString();
                 switch (s.codec_type)
                 {
                     case "video":
@@ -218,6 +223,14 @@ namespace Sushi.Net.Library.Tools
         public int? channels { get; set; }
         [JsonInclude]
         public string channel_layout { get; set; }
+
+        [JsonInclude]
+        public string avg_frame_rate { get; set; }
+
+        [JsonInclude]
+        public string r_frame_rate { get; set; }
+        [JsonInclude]
+        public string nb_read_packets { get; set; }
     }
     [JsonSerializable(typeof(Chapter))]
     public class Chapter

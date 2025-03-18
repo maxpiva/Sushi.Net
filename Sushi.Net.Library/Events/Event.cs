@@ -9,6 +9,7 @@ namespace Sushi.Net.Library.Events
         private Event _linked_event = null;
         private float _shift = 0;
         private float _start_shift = 0;
+
         public int SourceIndex { get; set; }
         public float Start { get; set; }
         public float End { get; set; }

@@ -40,9 +40,9 @@ namespace Sushi.Net.Library.Decoding
             return m;
         }
 
-        public Task ShiftAudioAsync(AudioMedia stream, string outputpath, List<IShiftBlock> blocks, string temppath)
+        public Task ShiftAudioAsync(AudioMedia stream, string outputpath, List<IShiftBlock> blocks, string temppath, float minmalms)
         {
-            return _ffmpeg.ShiftAudioAsync(stream, outputpath, blocks, temppath);
+            return _ffmpeg.ShiftAudioAsync(stream, outputpath, blocks, temppath, minmalms);
         }
         internal async Task ProcessAsync(Mux mux)
         {

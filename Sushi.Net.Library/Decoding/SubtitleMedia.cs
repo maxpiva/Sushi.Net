@@ -50,35 +50,36 @@ namespace Sushi.Net.Library.Decoding
             Dictionary<int, StringBuilder> outs = new Dictionary<int, StringBuilder>();
             for(int x=0;x<Mux.Subtitles.Count;x++)
                 outs.Add(Mux.Subtitles[x].Info.Id, new StringBuilder());
-            foreach (int idx in outs.Keys)
+            Dictionary<MediaStreamInfo, string> langs = AudioMedia.GenerateLanguages(Mux.Subtitles.Where(a => outs.Keys.Contains(a.Info.Id)).Select(a => a.Info));
+
+            foreach (MediaStreamInfo info in langs.Keys)
             {
-                MediaStreamInfo info = (MediaStreamInfo)Mux.Subtitles.First(a => a.Info.Id == idx).Info;
                 if (!string.IsNullOrWhiteSpace(info.Title))
                 {
-                    outs[idx].Append("_");
-                    outs[idx].Append(info.Title.Trim());
+                    outs[info.Id].Append("_");
+                    outs[info.Id].Append(info.Title.Trim());
                 }
                 if (info.Default)
                 {
-                    outs[idx].Append(".default");
+                    outs[info.Id].Append(".default");
                 }
                 if (info.Forced)
                 {
-                    outs[idx].Append(".forced");
+                    outs[info.Id].Append(".forced");
                 }
 
                 if (info.Comment)
                 {
-                    outs[idx].Append(".commentary");
+                    outs[info.Id].Append(".commentary");
                 }
                 if (info.HearingImpaired)
                 {
-                    outs[idx].Append(".sdh");
+                    outs[info.Id].Append(".sdh");
                 }
                 if (!string.IsNullOrEmpty(info.Language))
                 {
-                    outs[idx].Append(".");
-                    outs[idx].Append(info.Language);
+                    outs[info.Id].Append(".");
+                    outs[info.Id].Append(langs[info]);
                 }
 
 
