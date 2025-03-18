@@ -102,7 +102,8 @@ There are some retouched scripts and code from the original [OpenCvSharp](https:
 * Better parsing of Aegis Subs, and better error detection.
 * Correct errors resyncing opus and flac files. (ffmpeg script).
 * Added --subtitle-streams to only use specific subtitles (instead of all) as a base for subtitle sync.
-* Added --minimal-audio-shift (default 15 ms), when the change is less than 15 ms, do not process the audio stream. I ndividual audio stream delays are taken into consideration when syncing.
+* Added --minimal-audio-shift (default 15 ms), when the change is less than 15 ms, do not process the audio stream.
+* Individual audio stream delays are taken into consideration when syncing.
 * Lots of other bug fixes.
 
 **v1.0.0.**
