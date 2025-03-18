@@ -97,8 +97,8 @@ There are some retouched scripts and code from the original [OpenCvSharp](https:
 
 * Updated to .NET 9
 * Added multi wildcard (*) support for --src --dst, in the case if included will try to match src with destination and process the batch. -s also supports the wildcard to export the appropriate script, if included.
-* Added src-multi-sync with a number of seconds, this is useful when the --src media contains multiple audio streams, which may not sync, will get those few seconds of audio, and try to calculate the sync factor. (audio algorithm)
-* Added only extract subs, in the case you only want to do sub extractions with redimensions (Aegis Sub Subtitles).
+* Added src-multi-sync with a number of seconds, this is useful when the --src media contains multiple audio streams, which may not be synced between, will get those few seconds of audio, and try to calculate the sync factor. (audio algorithm)
+* Added only extract subs, in the case you only want to do sub extractions with re-dimensions (Aegis Sub Subtitles).
 * Better parsing of Aegis Subs, and better error detection.
 * Correct errors resyncing opus and flac files. (ffmpeg script).
 * Added --subtitle-streams to only use specific subtitles (instead of all) as a base for subtitle sync.
